@@ -19,20 +19,23 @@
 
 import sys
 import os
+import string
 
 if __name__ == "__main__":
 	
 	if len(sys.argv) == 2:
 		PATH = sys.argv[1]
 	else:
-		raise RuntimeError("[DO YOU REALLY THINK YOU CAN NOMPILE SOMETHING WITHOUT A PATH??? [G][E][N][I][U][S][!]]")
+		raise RuntimeError("[Do you really think you can nonpile something without a path??? [G][E][N][I][U][S][!]]")
 		
 	class Nonpiler():
+		
+		keywords = ['[o]', '[i]']
 		
 		def __init__(self, path):
 			self.path = os.path.join(path)
 			self.nonp = open(self.path, "r")
-			self.lines = self.nonp.readlines()
+			self.lines = [x.strip() for x in self.nonp.readlines()]
 			
 	np = Nonpiler(PATH)
 	print(np.lines)
