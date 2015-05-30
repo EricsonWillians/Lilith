@@ -10,7 +10,7 @@
 * Nested is better than flat.
 * Dense is better than sparse.
 * Readability is meaningless.
-* Special cases always are special enough to break the rules.
+* Special cases are always special enough to break the rules.
 * Although impracticality beats impurity.
 * Errors should ever pass silently.
 * Unless explicitly raised.
