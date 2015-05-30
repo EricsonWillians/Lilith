@@ -1,7 +1,7 @@
 # [NO-PITY-ON]
 [NO-PITY-ON] is a programming language that is the opposite of Python.
 
-The !Zen of [NO-PITY-ON]
+#### The !Zen of [NO-PITY-ON]
 
 * Ugly is better than beautiful.
 * Implicit is better than explicit.
