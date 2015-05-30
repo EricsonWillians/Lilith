@@ -1,5 +1,5 @@
 # [NO-PITY-ON]
-[NO-PITY-ON] is a programming language that is the opposite of Python.
+[NO-PITY-ON] is a programming language that is the opposite of [Python](https://www.python.org/dev/peps/pep-0020/).
 
 #### The not Zen of [NO-PITY-ON]:
 
