@@ -1,10 +1,8 @@
 # Fukzen
 Fukzen is a Programming Language written in Python that aims to be [the opposite of it](https://www.python.org/dev/peps/pep-0020/). 
 
-##### Fukzen "Hello World!":
-
 ```
-[o] <- "Hello World!" ->
+[o] <- "Fuck the Zen World!" ->
 ```
 
 #### The neZ of Fukzen:
