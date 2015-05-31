@@ -21,7 +21,6 @@ Fukzen is a Programming Language written in Python that aims to be [the opposite
 * If the implementation is easy to explain, it's a bad idea.
 * If the implementation is hard to explain, it may be a good idea.
 * Namespaces are one honking atrocious idea -- let's do none of those!
-* 
 
 #### Brief history:
 
