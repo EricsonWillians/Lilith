@@ -3,25 +3,42 @@ import os
 						
 if __name__ == "__main__":
 	
-	__keywords__ = ['[o]', '[i]', '[f]']
-	__tokens__ = ['=', '<-', '->']
+	__keywords__ = ['[i]', '[o]', '[f]']
+	__operators__ = ['<-', '->']
+	__statements__ = {"Assignment": [], "Output": []}
 	__vars__ = {}
 	
 	if len(sys.argv) == 2:
 		path = os.path.join(sys.argv[1])
-		with open(path, "r") as yp:
-			data = yp.read().replace('\n', '')
+		with open(path, "r") as fuk:
+			fukdata = fuk.read().replace('\n', '')
 	else:
 		raise RuntimeError("You must specify a path to a .fuk file.")
 
-	statements = data.split('->')
-	expressions = []
-	for statement in statements:
-		for token in __tokens__:
-			if token in statement:
-				expressions.append(statement.split(token))
-				
-	print(expressions)
+	def fetch_statements():
+		lines = fukdata.split('->')
+		for line in lines:
+			for operator in __operators__:
+				if operator in line and operator != '->':
+					split_line = line.split(operator)
+					left_side = split_line[0].replace(' ', '')
+					if left_side not in __keywords__:
+						__statements__["Assignment"].append(split_line)
+					elif left_side in __keywords__:
+						if left_side == '[o]':
+							__statements__["Output"].append(split_line)
+	
+	def fetch_vars():
+		for var in __statements__["Assignment"]:
+			name = var[0].replace(' ', '')
+			expression = var[1].replace(' ', '')
+			__vars__[name] = eval(expression, globals(), __vars__)
+			
+	def execute_io_operations():
+		for data in __statements__["Output"]:
+			expression = data[1].replace(' ', '')
+			print(eval(expression, globals(), __vars__))
 
-
-
+	fetch_statements()
+	fetch_vars()
+	execute_io_operations()
