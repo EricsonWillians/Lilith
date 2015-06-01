@@ -1,0 +1,13 @@
+<simple_statement> := <expression> <end_of_statement>
+<expression> := 'python_expression' | 
+	<identifier> <operator> <expression> | 
+	<function_call>
+<end_of_statement> := '->'
+<identifier> := 'a...Z' | 
+	'_'
+<operator> := '<-'
+<function_call> := '[' <identifier> ']' <operator> <argument> | 
+	'[' <keyword> ']' <operator> <argument>
+<argument> := 'python_expression' | 
+	'python_expression' <argument>
+<keyword> := 'i' | 'o'

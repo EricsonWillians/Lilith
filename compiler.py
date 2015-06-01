@@ -27,16 +27,18 @@ if __name__ == "__main__":
 					elif left_side in __keywords__:
 						if left_side == '[o]':
 							__statements__["Output"].append(split_line)
+						elif left_side == '[i]':
+							__statements__["Output"].append(split_line)
 	
 	def fetch_vars():
 		for var in __statements__["Assignment"]:
 			name = var[0].replace(' ', '')
-			expression = var[1].replace(' ', '')
+			expression = var[1]
 			__vars__[name] = eval(expression, globals(), __vars__)
 			
 	def execute_io_operations():
 		for data in __statements__["Output"]:
-			expression = data[1].replace(' ', '')
+			expression = data[1]
 			print(eval(expression, globals(), __vars__))
 
 	fetch_statements()
