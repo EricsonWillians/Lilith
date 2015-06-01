@@ -1,3 +1,6 @@
+''' This file only works if you're on Windows and you've added the path to the 
+folder where the Fukzen files are, to the system's Path environment variable.'''
+
 import os
 import sys
 
