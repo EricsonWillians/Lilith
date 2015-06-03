@@ -1,4 +1,4 @@
-<identifier> ::= 'a...Z' | '_'
+<identifier> ::= 'a...Z' | '_' # Any character from a to Z, and _.
 <shift_operator> ::= '<-'
 <end_of_statement> ::= '->'
 <keyword> ::= 'i' | 'o'
@@ -6,10 +6,14 @@
 <else_if> ::= '??'
 <else> ::= '???'
 
-<simple_statement> ::= <identifier> <shift_operator> <expression> <end_of_statement> |
-	<expression> <end_of_statement>
+<statement> ::= <expression-statement>
+              | <compound-statement>
+              | <selection-statement>
+              | <iteration-statement>
 
-<expression> ::= 'python_expression' | <function_call>
+<expression_statement> ::= 'python_expression' <end_of_statement> | <expression> <end_of_statement>
+<expression> ::= <assignment_expression> | <function_call>
+<assignment_expression> ::= <identifier> <shift_operator> 
 
 <function_call> ::= '[' <identifier> ']' <shift_operator> <argument_list> | 
 	'[' <keyword> ']' <shift_operator> <argument_list>
