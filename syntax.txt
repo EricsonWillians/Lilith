@@ -1,21 +1,21 @@
-<identifier> := 'a...Z' | '_'
-<shift_operator> := '<-'
-<end_of_statement> := '->'
-<keyword> := 'i' | 'o'
-<if> := '?'
-<else_if> := '??'
-<else> := '???'
+<identifier> ::= 'a...Z' | '_'
+<shift_operator> ::= '<-'
+<end_of_statement> ::= '->'
+<keyword> ::= 'i' | 'o'
+<if> ::= '?'
+<else_if> ::= '??'
+<else> ::= '???'
 
-<simple_statement> := <identifier> <shift_operator> <expression> <end_of_statement> |
+<simple_statement> ::= <identifier> <shift_operator> <expression> <end_of_statement> |
 	<expression> <end_of_statement>
 
-<expression> := 'python_expression' | <function_call>
+<expression> ::= 'python_expression' | <function_call>
 
-<function_call> := '[' <identifier> ']' <shift_operator> <argument_list> | 
+<function_call> ::= '[' <identifier> ']' <shift_operator> <argument_list> | 
 	'[' <keyword> ']' <shift_operator> <argument_list>
 
-<argument_list> := 'python_expression' | 'python_expression' <shift_operator> <argument_list>
+<argument_list> ::= 'python_expression' | 'python_expression' <shift_operator> <argument_list>
 
-<compound_statement> := <if_statement> | <function_definition>
+<compound_statement> ::= <if_statement> | <function_definition>
 
-<if_statement> := 
+<if_statement> ::= 
