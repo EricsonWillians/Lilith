@@ -1,9 +1,1 @@
-cliche_string <- "Hello Fucking World!" -> 
-[o] <- cliche_string ->
-[o] <- "Welcome to Fukzen! A Programming Language that uses Python expressions as part of it's syntax, but fucks with it's 'dogma'" ->
-bloody_hell <- (lambda x: ['nasty shit' for n in range(3)])("Whatever") ->
-[o] <- bloody_hell ->
-[o] <- ''.join((lambda: ["Boo!! " for boo in range(13)])()) ->
-[o] <- "My first syntax, and it works haha!" ->
-simple_and_stupid_math_example <- 1+1 ->
-[o] <- "Genius: " + str(simple_and_stupid_math_example) ->
+3 + 4
