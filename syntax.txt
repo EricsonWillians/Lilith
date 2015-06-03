@@ -11,11 +11,10 @@
 
 <expression> := 'python_expression' | <function_call>
 
-<function_call> := '[' <identifier> ']' <shift_operator> <argument> | 
-	'[' <keyword> ']' <shift_operator> <argument>
+<function_call> := '[' <identifier> ']' <shift_operator> <argument_list> | 
+	'[' <keyword> ']' <shift_operator> <argument_list>
 
-<argument> := 'python_expression' | 'python_expression' <argument>
-
+<argument_list> := 'python_expression' | 'python_expression' <shift_operator> <argument_list>
 
 <compound_statement> := <if_statement> | <function_definition>
 
