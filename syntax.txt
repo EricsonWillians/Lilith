@@ -1,25 +1,89 @@
-<identifier> ::= 'a...Z' | '_' # Any character from a to Z, and _.
+#####################################################
+
+<statement> ::= <expression_statement> <end_of_statement>
+				| <assignment_statement> <end_of_statement>
+				| <conditional_statement> <end_of_statement>
+				| <iteration_statement> <end_of_statement>
+				| <function_definition> <end_of_statement>
+				| <class_definition> <end_of_statement>
+
+<expression_statement> ::= <expression>
+<expression> ::= 'python_expression' 
+				| <function_call> 
+				| <negation>
+				| <increment> 
+				| <decrement>
+
+#####################################################
+
+<assignment_statement> ::= <identifier> <assignment_operator> <expression> 
+<function_call> ::= '[' <identifier> ']' <shift_operator> <argument_list> 
+				| '[' <keyword> ']' <shift_operator> <argument_list>
+<argument_list> ::= <expression>  | <expression>  <shift_operator> <argument_list>
+
+#####################################################
+
+<conditional_statement> ::= <if_condition> <then> <assignment_or_expression>
+				| <if_condition> <then> <assignment_or_expression> <else> <assignment_or_expression>
+				| <if_condition> <open_block> <statement_list> <close_block>
+				| <if_condition> <open_block> <statement_list> <close_block> <else_if_condition> <open_block> <statement_list> <close_block>
+				| <if_condition> <open_block> <statement_list> <close_block> <else_if_condition> <open_block> <statement_list> <close_block> <else> <open_block> <statement_list> <close_block>
+
+<if_condition> ::= <if> <shift_operator> <expression>
+<else_if_condition> <else_if> <shift_operator> <expression>
+<assignment_or_expression> ::= <expression_statement> | <assignment_statement>
+<statement_list> ::= <statement> | <return_statement> | <statement> <statement_list>
+
+#####################################################
+
+<iteration_statement> ::= <while_condition> <open_block> <statement_list> <close_block> 
+				| <for_condition> <open_block> <statement_list> <close_block> 
+				| <break_statement>
+				| <continue_statement>
+
+<while_condition> ::= <while> <shift_operator> <expression>
+<for_condition> ::= <for> <assignment_statement> <end_of_statement> <expression> <end_of_statement> <increment>
+				| <for> <assignment_statement> <end_of_statement> <expression> <end_of_statement> <decrement>
+<break_statement> ::= <break> <end_of_statement>
+<continue_statement> ::= <continue> <end_of_statement>
+
+#####################################################
+
+<function_definition> ::= '[' <identifier> ']' <function_argument_list> <open_block> <statement_list> <close_block>
+
+<function_argument_list> ::= <local_identifier>
+				| <default_argument>
+				| <local_identifier> <separator> <function_argument_list>
+				| <default_argument> <separator> <function_argument_list>
+				
+<return_statement> ::= <return> <expression_statement>
+<default_argument> ::= <local_identifier> <shift_operator> <expression>
+
+#####################################################
+
+<assignment_operator> ::= <shift_operator> | <augmented_shift_operator>
 <shift_operator> ::= '<-'
-<end_of_statement> ::= '->'
-<keyword> ::= 'i' | 'o'
+<augmented_shift_operator> ::= '<+>'
+				| '<->'
+				| '<*>'
+				| '</>'
+				| '<%>'
+
+<identifier> ::= 'a...Z' | '_' # Any character from a to Z, and _.
+<local_identifier> ::= <identifier>
+<end_of_statement> ::= '|'
+<open_block> ::= '|>'
+<close_block> ::= '<|'
 <if> ::= '?'
+<then> ::= '!>'
 <else_if> ::= '??'
 <else> ::= '???'
-
-<statement> ::= <expression-statement>
-              | <compound-statement>
-              | <selection-statement>
-              | <iteration-statement>
-
-<expression_statement> ::= 'python_expression' <end_of_statement> | <expression> <end_of_statement>
-<expression> ::= <assignment_expression> | <function_call>
-<assignment_expression> ::= <identifier> <shift_operator> 
-
-<function_call> ::= '[' <identifier> ']' <shift_operator> <argument_list> | 
-	'[' <keyword> ']' <shift_operator> <argument_list>
-
-<argument_list> ::= 'python_expression' | 'python_expression' <shift_operator> <argument_list>
-
-<compound_statement> ::= <if_statement> | <function_definition>
-
-<if_statement> ::= 
+<negation> ::= '!'<identifier>
+<while> ::= '@'
+<for> ::= '<@>'
+<increment> ::= <identifier>'++' | '++'<identifier>
+<decrement> ::= <identifier>'--' | '--'<identifier> 
+<break> ::= '<@'
+<continue> ::= '@>'
+<separator> ::= '{}'
+<return> ::= '/\'
