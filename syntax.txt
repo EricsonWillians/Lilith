@@ -17,8 +17,8 @@
 #####################################################
 
 <assignment_statement> ::= <identifier> <assignment_operator> <expression> 
-<function_call> ::= '[' <identifier> ']' <shift_operator> <argument_list> 
-				| '[' <keyword> ']' <shift_operator> <argument_list>
+<function_call> ::= <open_function_identifier> <identifier> <close_function_identifier> <shift_operator> <argument_list> 
+				| <open_function_identifier> <keyword> <close_function_identifier> <shift_operator> <argument_list>
 <argument_list> ::= <expression>  | <expression>  <shift_operator> <argument_list>
 
 #####################################################
@@ -49,7 +49,7 @@
 
 #####################################################
 
-<function_definition> ::= '[' <identifier> ']' <function_argument_list> <open_block> <statement_list> <close_block>
+<function_definition> ::= <open_function_identifier> <identifier> <close_function_identifier> <function_argument_list> <open_block> <statement_list> <close_block>
 
 <function_argument_list> ::= <local_identifier>
 				| <default_argument>
@@ -69,6 +69,8 @@
 				| '</>'
 				| '<%>'
 
+<open_function_identifier> ::= '['
+<close_function_identifier> ::= ']'
 <identifier> ::= 'a...Z' | '_' # Any character from a to Z, and _.
 <local_identifier> ::= <identifier>
 <end_of_statement> ::= '|'
