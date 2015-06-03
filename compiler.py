@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 class __tokens__(dict):
 	
@@ -30,6 +31,21 @@ class __tokens__(dict):
 		self['separator'] = '{}'
 		self['return'] = '/\\'
 
+class __statements__(dict):
+	
+	class __scope__(dict):
+		def __init__(self):
+			dict.__init__(self)
+	
+	class __statement__(list):
+		def __init__(self):
+			list.__init__(self)
+		
+	def __init__(self):
+		dict.__init__(self)
+		self['scope_statement'] = __statements__.__scope__()
+		self['expression_statement'] = __statements__.__statement__()
+
 class __expressions__(list):
 	
 	def __init__(self):
@@ -49,12 +65,20 @@ class __parser__():
 			raise RuntimeError("You must specify a path to a .fuk file.")
 		
 		self.tokens = __tokens__()
+		self.statements = __statements__()
 		self.expressions = __expressions__()
+		self.parse_scope_statements()
 
 	def __str__(self):
 		return self.data
 
+	def parse_scope_statements(self):
+		
+		# Learning how to use regex...
+		# It's going to be fucking necessary for this task...
+		
+		self.scope_list = re.search(self.tokens["open_block"], self.data).groups()
+		print(self.scope_list)
+
 if __name__ == "__main__":
-	
-	print(__parser__().tokens)
-	
+	__parser__()

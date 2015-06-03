@@ -1,12 +1,14 @@
 #####################################################
 
-<statement> ::= <expression_statement> <end_of_statement>
+<statement> ::= <scope_definition> 
+				| <expression_statement> <end_of_statement>
 				| <assignment_statement> <end_of_statement>
 				| <conditional_statement> <end_of_statement>
 				| <iteration_statement> <end_of_statement>
 				| <function_definition> <end_of_statement>
 				| <class_definition> <end_of_statement>
 
+<scope_definition> ::= <identifier> <open_block> <statement_list> <close_block>
 <expression_statement> ::= <expression>
 <expression> ::= 'python_expression' 
 				| <function_call> 
