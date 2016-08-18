@@ -1,5 +1,5 @@
-# W Programming Language
+# The Jack Parsons Language is an open-source programming language written in Python.
 
 ```
-[o] <- "Hello World!" ->
+[o] <- *Hello World!* ->
 ```
