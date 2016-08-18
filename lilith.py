@@ -1,7 +1,7 @@
 from ply import yacc
 from lexer import tokens as tk
-from functools import reduce
 from re import compile
+from sys import argv, exit
 
 tokens = tk
 identifiers = {}
@@ -120,6 +120,13 @@ def p_error(t):
     print("Syntax error at '%s'" % t.value)
 
 if __name__ == "__main__":
-	yacc.yacc()
-	result = yacc.parse(data)
+	parser = yacc.yacc()
+	if len(argv) > 1:
+		_file = argv[1]
+		with open(_file) as f:
+			data = f.read()
+			parser.parse(data)
+	else:
+		print("Lilith cannot execute that which lieth in the void.")
+		exit()
 	# flatten = lambda lst: reduce(lambda l, i: l + flatten(i) if isinstance(i, (list, tuple)) else l + [i], lst, [])  
