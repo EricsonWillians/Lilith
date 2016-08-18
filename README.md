@@ -1,4 +1,4 @@
-# The Jack Parsons Language
+# The Lilith Programming Language
 ### An open-source programming language written in Python.
 
 ```
