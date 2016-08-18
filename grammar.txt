@@ -1,0 +1,43 @@
+plus : '+'
+minus: '-'
+mult: '*'
+div: '/'
+mod: '%'
+pow: '^'
+open_parenthesis: '('
+close_parenthesis: ')'
+end: '->'
+identifier: [a...Z] | [a...Z] identifier
+number: [0...9] # Any number.
+expr : expr plus term 
+	 | expr minus term 
+	 | term
+term : term mult factor 
+	 | term div factor 
+	 | term mod factor
+	 | term pow factor
+	 | factor
+factor : open_parenthesis expr close_parenthesis 
+	   | identifier 
+	   | number
+simple_assignment_operator: '='
+addition_assignment_operator: '+='
+subtraction_assignment_operator: '-='
+multiplication_assignment_operator: '*='
+division_assignment_operator: '/='
+modulo_assignment_operator: '%='
+assignment_operator : simple_assignment_operator
+				    | addition_assignment_operator
+				    | subtraction_assignment_operator
+				    | multiplication_assignment_operator
+				    | division_assignment_operator
+				    | modulo_assignment_operator
+assignment : identifier assignment_operator expr
+input_operator : '[i]'
+output_operator : '[o]'
+send_operator : '<-'
+io_operation : input_operation
+			 | output_operation
+input_operation : identifier send_operator input_operator
+				| identifier send_operator input_operator send_operator expr
+output_operation : output_operator send_operator expr
