@@ -61,20 +61,31 @@ close_parenthesis: ')'
 end: '->'
 identifier: [a...Z] | [a...Z] identifier
 number: [0...9] # Any number.
-program : stmt
-		| program stmt
-stmt : expr end
-	 | assignment end
-     | io_operation end
-expr : expr plus term 
-	 | expr minus term 
-	 | term
+program : statement
+		| program statement
+statement : condition_statement end
+		  | expression end
+		  | assignment end
+		  | io_operation end
+compound_statement : statement
+				   | statement compound_statement
+expression : expression plus term 
+		   | expression minus term 
+		   | expression greater_than_relational_operator term 
+		   | expression greater_than_or_equal_to_relational_operator term 
+		   | expression less_than_relational_operator term 
+		   | expression less_than_or_equal_to_relational_operator term
+		   | term
+		   | string
 term : term mult factor 
 	 | term div factor 
 	 | term mod factor
 	 | term pow factor
+	 | term equal_to_relational_operator factor 
+	 | term not_equal_to_relational_operator factor 
+	 | term alt_not_equal_to_relational_operator factor 
 	 | factor
-factor : open_parenthesis expr close_parenthesis 
+factor : open_parenthesis expression close_parenthesis 
 	   | identifier 
 	   | number
 name : identifier
@@ -90,15 +101,15 @@ assignment_operator : simple_assignment_operator
 				    | multiplication_assignment_operator
 				    | division_assignment_operator
 				    | modulo_assignment_operator
-assignment : identifier assignment_operator expr
+assignment : identifier assignment_operator expression
 input_operator : '[i]'
 output_operator : '[o]'
 send_operator : '<-'
 io_operation : input_operation
 			 | output_operation
 input_operation : identifier send_operator input_operator
-				| identifier send_operator input_operator send_operator expr
-output_operation : output_operator send_operator expr
+				| identifier send_operator input_operator send_operator expression
+output_operation : output_operator send_operator expression
 greater_than_relational_operator : '>'
 greater_than_or_equal_to_relational_operator : '>='
 less_than_relational_operator : '<'
@@ -117,11 +128,11 @@ alternative_condition_specification_operator : '??'
 else_operator : '???'
 post_condition_evaluation_block_opening_operator : '<?'
 post_condition_evaluation_block_closing_operator : '?>'
-post_condition_evaluation_block : post_condition_evaluation_block_opening_operator program post_condition_evaluation_block_closing_operator
-condition_statement : condition_specification_operator expr post_condition_evaluation_block
-					| condition_specification_operator expr post_condition_evaluation_block condition_extension
-condition_extension : alternative_condition_specification_operator expr post_condition_evaluation_block
-					| alternative_condition_specification_operator expr post_condition_evaluation_block condition_extension
+post_condition_evaluation_block : post_condition_evaluation_block_opening_operator compound_statement post_condition_evaluation_block_closing_operator
+condition_statement : condition_specification_operator expression post_condition_evaluation_block
+					| condition_specification_operator expression post_condition_evaluation_block condition_extension
+condition_extension : alternative_condition_specification_operator expression post_condition_evaluation_block
+					| alternative_condition_specification_operator expression post_condition_evaluation_block condition_extension
 					| else
 else : else_operator post_condition_evaluation_block
 ```
