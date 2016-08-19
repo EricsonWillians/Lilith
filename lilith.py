@@ -5,6 +5,8 @@ from sys import argv, exit
 
 tokens = tk
 identifiers = {}
+condition_blocks = {0: True}
+current_condition_block = 0
 
 def p_program(p):
 	"""program : stmt
@@ -12,7 +14,8 @@ def p_program(p):
 	p[0] = [x for x in p if x]
 
 def p_stmt(p):
-	"""stmt : expr end
+	"""stmt : condition_statement end
+			| expr end
 		    | assignment end
 		    | io_operation end"""
 	p[0] = ("stmt", p[1], p[2])
@@ -20,6 +23,10 @@ def p_stmt(p):
 def p_expr(p):
 	"""expr : expr plus term 
 			| expr minus term 
+			| expr greater_than_relational_operator term 
+			| expr greater_than_or_equal_to_relational_operator term 
+			| expr less_than_relational_operator term 
+			| expr less_than_or_equal_to_relational_operator term
 			| term
 			| string"""
 	if len(p) == 4:
@@ -27,6 +34,14 @@ def p_expr(p):
 			p[0] = p[1] + p[3]
 		elif p[2] == '-':
 			p[0] = p[1] - p[3]
+		elif p[2] == '>':
+			p[0] = p[1] > p[3]
+		elif p[2] == '>=':
+			p[0] = p[1] >= p[3]
+		elif p[2] == '<':
+			p[0] = p[1] <= p[3]
+		elif p[2] == '<=':
+			p[0] = p[1] <= p[3]
 	else:
 		p[0] = p[1]
 
@@ -35,6 +50,9 @@ def p_term(p):
 			| term div factor 
 			| term mod factor
 			| term pow factor
+			| term equal_to_relational_operator factor 
+			| term not_equal_to_relational_operator factor 
+			| term alt_not_equal_to_relational_operator factor 
 			| factor"""
 	if len(p) == 4:
 		if p[2] == '*':
@@ -45,6 +63,10 @@ def p_term(p):
 			p[0] = p[1] % p[3]
 		elif p[2] == '^':
 			p[0] = p[1] ** p[3]
+		elif p[2] == '==':
+			p[0] = p[1] == p[3]
+		elif p[2] == '<>' or p[2] == '!=':
+			p[0] = p[1] != p[3]
 	else:
 		p[0] = p[1]
 
@@ -90,7 +112,7 @@ def p_assignment_operator(p):
 
 def p_assignment(p):
 	"""assignment : identifier assignment_operator expr"""
-	if len(p) == 4:
+	if len(p) == 4 and condition_blocks[current_condition_block]:
 		if p[2] == '=':
 			identifiers[p[1]] = parse_object(p[3])
 		elif p[2] == "+=":
@@ -116,8 +138,31 @@ def p_output_operation(p):
 	if len(p) == 4:
 		print(p[3])
 
+def p_condition_statement(p):
+	"""condition_statement : condition_specification_operator expr post_condition_evaluation_block
+						   | condition_specification_operator expr post_condition_evaluation_block condition_extension"""
+
+def p_post_condition_evaluation_block(p):
+	"""post_condition_evaluation_block : post_condition_evaluation_block_opening_operator program post_condition_evaluation_block_closing_operator"""
+	global current_condition_block
+	current_condition_block += 1
+	condition_blocks[current_condition_block] = p[2]
+	print(condition_blocks)
+
+def p_condition_extension(p):
+	"""condition_extension : alternative_condition_specification_operator expr post_condition_evaluation_block
+						   | alternative_condition_specification_operator expr post_condition_evaluation_block condition_extension
+					       | else"""
+
+def p_else(p):
+	"""else : else_operator post_condition_evaluation_block"""
+	p[0] = (p[1], p[2], p[3])
+
 def p_error(t):
-    print("Syntax error at '%s'" % t.value)
+	try:
+		print("Syntax error at '%s'" % t.value)
+	except AttributeError as e:
+		pass
 
 if __name__ == "__main__":
 	parser = yacc.yacc()

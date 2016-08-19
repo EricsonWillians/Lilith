@@ -22,7 +22,19 @@ tokens = [
 	"modulo_assignment_operator",
 	"input_operator",
 	"output_operator",
-	"send_operator"
+	"send_operator",
+	"greater_than_relational_operator",
+	"greater_than_or_equal_to_relational_operator",
+	"less_than_relational_operator",
+	"less_than_or_equal_to_relational_operator",
+	"equal_to_relational_operator",
+	"not_equal_to_relational_operator",
+	"alt_not_equal_to_relational_operator",
+	"condition_specification_operator",
+	"alternative_condition_specification_operator",
+	"else_operator",
+	"post_condition_evaluation_block_opening_operator",
+	"post_condition_evaluation_block_closing_operator"
 ]
 
 t_ignore = r""" 	
@@ -48,9 +60,23 @@ t_modulo_assignment_operator = r'%='
 t_input_operator = r'\[i\]'
 t_output_operator = r'\[o\]'
 t_send_operator = r'<-'
+t_greater_than_relational_operator = r'>'
+t_greater_than_or_equal_to_relational_operator = r'>='
+t_less_than_relational_operator = r'<'
+t_less_than_or_equal_to_relational_operator = r'<='
+t_equal_to_relational_operator = r'=='
+t_not_equal_to_relational_operator = r'<>'
+t_alt_not_equal_to_relational_operator = r'!='
+t_condition_specification_operator = r'\?'
+t_alternative_condition_specification_operator = r'\?\?'
+t_else_operator = r'\?\?\?'
+t_post_condition_evaluation_block_opening_operator = r'<\?'
+t_post_condition_evaluation_block_closing_operator = r'\?>'
 
 def t_error(t):
-    print("Illegal character '%s'" % t.value[0])
-    exit()
+	try:
+		print("Illegal character '%s'" % t.value[0])
+	except AttributeError as e:
+		print("Error")
 
 lex.lex()
