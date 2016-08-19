@@ -1,7 +1,7 @@
 # The Lilith Programming Language
 ### An open-source programming language written in Python.
 
-[[https://s3.postimg.org/njfood043/logo.png|alt=lilith]]
+![Lilith Logo](https://s3.postimg.org/njfood043/logo.png)
 
 ```
 [o] <- *Hello World!* ->
