@@ -46,7 +46,7 @@ y = 8 ->
 The goal of the Lilith Programming Language is to develop an entirely new programming language from Python, in order to experiment with features that can be added to a programming language, to expand our knowledge, and to create an alternative that is as powerful as Python, borrowing its native libraries. For now, Lilith is an interpreted programming language, but eventually it will be compiled to Python, so that it can run with the same speed. 
 
 #### Disclaimer:
-The syntax **shall** be completely different from Python, and even C. Lilith is rebellious to its God and his "Zen of Python", so if you're a conservative, it's best for you to stay in heaven.
+The syntax **shall** be completely different from Python, and even C. Lilith is rebellious to her God and his "Zen of Python", so if you're a conservative, it's best for you to stay in heaven.
 
 #### Grammar:
 ```
