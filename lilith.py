@@ -9,26 +9,31 @@ condition_blocks = {0: True}
 current_condition_block = 0
 
 def p_program(p):
-	"""program : stmt
-			   | program stmt"""
+	"""program : statement
+			   | program statement"""
 	p[0] = [x for x in p if x]
 
-def p_stmt(p):
-	"""stmt : condition_statement end
-			| expr end
-		    | assignment end
-		    | io_operation end"""
-	p[0] = ("stmt", p[1], p[2])
+def p_statement(p):
+	"""statement : condition_statement end
+			     | expression end
+		         | assignment end
+		         | io_operation end"""
+	p[0] = ("statement", p[1], p[2])
+
+def p_compound_statement(p):
+	"""compound_statement : statement
+						  | statement compound_statement"""
+	p[0] = ("compound_statement", p[1])
 
 def p_expr(p):
-	"""expr : expr plus term 
-			| expr minus term 
-			| expr greater_than_relational_operator term 
-			| expr greater_than_or_equal_to_relational_operator term 
-			| expr less_than_relational_operator term 
-			| expr less_than_or_equal_to_relational_operator term
-			| term
-			| string"""
+	"""expression : expression plus term 
+			      | expression minus term 
+			      | expression greater_than_relational_operator term 
+			      | expression greater_than_or_equal_to_relational_operator term 
+			      | expression less_than_relational_operator term 
+			      | expression less_than_or_equal_to_relational_operator term
+			      | term
+			      | string"""
 	if len(p) == 4:
 		if p[2] == '+':
 			p[0] = p[1] + p[3]
@@ -71,7 +76,7 @@ def p_term(p):
 		p[0] = p[1]
 
 def p_factor(p):
-	"""factor : open_parenthesis expr close_parenthesis 
+	"""factor : open_parenthesis expression close_parenthesis 
 			  | name 
 			  | number"""
 	if len(p) == 4:
@@ -111,7 +116,7 @@ def p_assignment_operator(p):
 	p[0] = p[1]
 
 def p_assignment(p):
-	"""assignment : identifier assignment_operator expr"""
+	"""assignment : identifier assignment_operator expression"""
 	if len(p) == 4 and condition_blocks[current_condition_block]:
 		if p[2] == '=':
 			identifiers[p[1]] = parse_object(p[3])
@@ -131,27 +136,27 @@ def p_io_operation(p):
 
 def p_input_operation(p):
 	"""input_operation : identifier send_operator input_operator
-					   | identifier send_operator input_operator send_operator expr"""
+					   | identifier send_operator input_operator send_operator expression"""
 
 def p_output_operation(p):
-	"""output_operation : output_operator send_operator expr"""
+	"""output_operation : output_operator send_operator expression"""
 	if len(p) == 4:
 		print(p[3])
 
 def p_condition_statement(p):
-	"""condition_statement : condition_specification_operator expr post_condition_evaluation_block
-						   | condition_specification_operator expr post_condition_evaluation_block condition_extension"""
-
-def p_post_condition_evaluation_block(p):
-	"""post_condition_evaluation_block : post_condition_evaluation_block_opening_operator program post_condition_evaluation_block_closing_operator"""
+	"""condition_statement : condition_specification_operator expression post_condition_evaluation_block
+						   | condition_specification_operator expression post_condition_evaluation_block condition_extension"""
 	global current_condition_block
 	current_condition_block += 1
 	condition_blocks[current_condition_block] = p[2]
 	print(condition_blocks)
 
+def p_post_condition_evaluation_block(p):
+	"""post_condition_evaluation_block : post_condition_evaluation_block_opening_operator compound_statement post_condition_evaluation_block_closing_operator"""
+	
 def p_condition_extension(p):
-	"""condition_extension : alternative_condition_specification_operator expr post_condition_evaluation_block
-						   | alternative_condition_specification_operator expr post_condition_evaluation_block condition_extension
+	"""condition_extension : alternative_condition_specification_operator expression post_condition_evaluation_block
+						   | alternative_condition_specification_operator expression post_condition_evaluation_block condition_extension
 					       | else"""
 
 def p_else(p):
