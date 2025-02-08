@@ -97,10 +97,52 @@
 <type_expr>    ::= <expr>
 
 ; ------------------------------------------------------------
-; Metaprogramming
+; Enhanced Macro System
 ; ------------------------------------------------------------
-<macro_def>    ::= "<%|" <id> <param_block> "[[" <stmt_list> "]]" "|%>"
-<macro_call>   ::= <id> <arg_block>
+<macro_def>    ::= "<%|" <macro_header> "[[" <macro_body> "]]" "|%>"
+
+<macro_header> ::= <id> <param_block> [ "->" <phase_spec> ]
+<phase_spec>   ::= "!PARSE"  ; Execute during parsing
+                 | "!EXPAND" ; Execute during macro expansion
+                 | "!COMPILE"; Execute during compilation
+
+<macro_body>   ::= <stmt_list>
+                 | <pattern_match>
+                 | <ast_transform>
+                 | <quote_expr>
+
+; Quote and Unquote operations (like LISP's ` and ,)
+<quote_expr>   ::= "`[" <expr> "]`"
+<unquote_expr> ::= ",[" <expr> "],"
+
+; Pattern matching for AST transformation
+<pattern_match>::= "{#" <ast_pattern> "#}"
+<ast_pattern>  ::= <node_match> | <tree_match>
+<node_match>   ::= "(@" <pattern_expr> "@)"
+<tree_match>   ::= "(<" <pattern_expr> ">)"
+
+; AST Manipulation
+<ast_transform>::= "{@" <transform_rules> "@}"
+<transform_rules>::= <rule> { "][" <rule> }
+<rule>         ::= <pattern> "=>>" <template>
+
+; Hygiene Control
+<hygiene_spec> ::= "[#" <scope_rules> "#]"
+<scope_rules>  ::= "!CAPTURE"  ; Capture environment
+                 | "!ISOLATE"  ; Create isolated scope
+                 | "!INJECT"   ; Force symbol injection
+
+; Symbol manipulation
+<sym_expr>     ::= "<%%" <sym_op> "%%>"
+<sym_op>       ::= <gensym>   ; Generate unique symbol
+                 | <sym_join> ; Join symbols
+                 | <sym_split>; Split symbol
+
+; Compile-time computation
+<compile_expr> ::= "<@" <comp_expr> "@>"
+<comp_expr>    ::= <eval_expr>
+                 | <type_expr>
+                 | <const_expr>
 
 ; ------------------------------------------------------------
 ; Parallel Processing

@@ -515,3 +515,122 @@
         ]]~>
     ]]|)
 ]}
+
+# Macro Examples
+
+### Basic Macro Definition
+```lilith
+/* Define a simple logging macro */
+<%| LOG ((level,, msg)) -> !EXPAND [[
+    `[ @!(("[" ++ level ++ "] " ++ msg)) ]`
+]]|%>
+
+/* Usage */
+LOG(("DEBUG",, "Starting process"))
+```
+
+### Pattern Matching and AST Transformation
+```lilith
+/* Define a macro for custom loop syntax */
+<%| REPEAT ((count,, body)) -> !PARSE [[
+    {# (@REPEAT (@COUNT) (@BODY)) #} =>
+    `[
+        i [=] 0
+        <+((i << ,[ count ],))[[
+            ,[ body ],
+            i [=] i ++ 1
+        ]]+>
+    ]`
+]]|%>
+
+/* Usage */
+REPEAT((5,, @!(("Hello"))))
+```
+
+### DSL Creation Example
+```lilith
+/* Define SQL-like DSL */
+<%| SELECT ((fields,, from,, where)) -> !PARSE [[
+    {# (@SELECT (@FIELDS) (@FROM) (@WHERE)) #} =>
+    `[
+        query_builder(({<
+            "type" [:] "select",,
+            "fields" [:] ,[ fields ],,,
+            "from" [:] ,[ from ],,,
+            "where" [:] ,[ where ],
+        >}))
+    ]`
+]]|%>
+
+/* Usage */
+SELECT((
+    [<"name",, "age">],, 
+    "users",, 
+    "age >> 18"
+))
+```
+
+### Hygienic Macros
+```lilith
+/* Define a hygienic loop macro */
+<%| FOR_EACH ((item,, collection,, body)) -> !EXPAND [[
+    [#!ISOLATE#]  /* Create isolated scope */
+    `[
+        iter [=] get_iterator((,[ collection ],))
+        <+((has_next((iter))))[[
+            ,[ item ], [=] next((iter))
+            ,[ body ],
+        ]]+>
+    ]`
+]]|%>
+```
+
+### Compile-time Computation
+```lilith
+/* Define compile-time factorial */
+<%| FACT ((n)) -> !COMPILE [[
+    <@
+        [?((n == 0))[[
+            )- 1 -(
+        ]]:|:[[
+            )- n ** FACT((n -- 1)) -(
+        ]]?]
+    @>
+]]|%>
+
+/* Usage - computed at compile time */
+array_size [=] FACT((5))  /* Becomes array_size [=] 120 */
+```
+
+### Symbol Generation and Manipulation
+```lilith
+/* Generate unique symbol names */
+<%| UNIQUE_VAR ((prefix)) [[
+    <%% gensym((prefix)) %%>
+]]|%>
+
+/* Usage */
+temp_var [=] UNIQUE_VAR(("temp"))  /* Creates unique symbol */
+```
+
+## Benefits of Enhanced Macro System
+
+1. **Powerful DSL Creation**
+   - Pattern matching for syntax transformation
+   - Hygienic macro expansion
+   - Custom syntax rules
+
+2. **Compile-time Optimization**
+   - Constant folding
+   - Dead code elimination
+   - Custom optimizations
+
+3. **Code Generation**
+   - Template-based generation
+   - AST manipulation
+   - Symbol management
+
+4. **Phase Separation**
+   - Parse-time macros
+   - Expansion-time macros
+   - Compilation-time macros
