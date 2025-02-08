@@ -1,24 +1,26 @@
 ; ============================================================
-; Lilith Programming Language Grammar (Fully Enhanced)
+; Lilith Programming Language Grammar (Complete Specification)
 ; ============================================================
 ; 
 ; Core design:
-;   • Every token is a punctuation sequence.
-;   • Paired tokens are chosen for maximal symmetry.
-;   • Reserved tokens (e.g. "{[", "]}", etc.) must not appear within identifiers.
+;   • Every token is a punctuation sequence
+;   • Paired tokens are chosen for maximal symmetry
+;   • Reserved tokens must not appear within identifiers
+;   • Pure symbolic representation for AI optimization
 ;
-; This grammar now supports:
-;   - Collections (lists, tuples, dictionaries, sets) with comprehensions.
-;   - Synchronous and asynchronous function definitions with type annotations.
-;   - Return and yield statements.
-;   - Exception handling (try, except, finally).
-;   - Loop control (break and continue).
-;   - Pattern matching (match–case with simple destructuring).
-;   - Asynchronous constructs (await expressions).
-;   - Macros for metaprogramming.
-;   - Comments (lexer-level: “/* … */”).
+; This grammar supports:
+;   - Core language features (functions, classes, control flow)
+;   - Collections and comprehensions
+;   - Parallel and GPU computation
+;   - Neural network and tensor operations
+;   - Advanced memory management
+;   - Stream and batch processing
+;   - Type system and annotations
 ; ============================================================
 
+; ------------------------------------------------------------
+; Program Structure
+; ------------------------------------------------------------
 <program>      ::= "{[" <stmt_list> "]}"
 
 <stmt_list>    ::= <stmt> { "][" <stmt> }
@@ -34,119 +36,188 @@
                  | <break_stmt>
                  | <continue_stmt>
                  | <macro_def>
+                 | <memory_stmt>        ; New: Memory management
+                 | <device_stmt>        ; New: Device control
 
 <expr_stmt>    ::= <expr>
 
 <assign_stmt>  ::= <id> "[=]" <expr>
 
 ; ------------------------------------------------------------
-; Import Statements
+; Import System
 ; ------------------------------------------------------------
 <import_stmt>  ::= "<{" <import_list> "}>"
 <import_list>  ::= <module> { ",," <module> }
-<module>       ::= <id> { ".." <id> }     ; Hierarchical module names via ".."
+<module>       ::= <id> { ".." <id> }     ; Hierarchical modules
 
 ; ------------------------------------------------------------
-; Return and Yield Statements
+; Control Flow
 ; ------------------------------------------------------------
-<return_stmt>  ::= ")-" [ <expr> ] "-("         ; “return” (optionally with an expression)
-<yield_stmt>   ::= ")-?" [ <expr> ] "?-("       ; “yield” (for generators)
-
-; ------------------------------------------------------------
-; Loop Control
-; ------------------------------------------------------------
-<break_stmt>   ::= "]-!"                      ; “break”
-<continue_stmt>::= "]-?"                      ; “continue”
+<return_stmt>  ::= ")-" [ <expr> ] "-("   
+<yield_stmt>   ::= ")-?" [ <expr> ] "?-("  
+<break_stmt>   ::= "]-!"                   
+<continue_stmt>::= "]-?"                   
 
 ; ------------------------------------------------------------
 ; Exception Handling
 ; ------------------------------------------------------------
 <try_stmt>     ::= "{?" <block> { <except_clause> } [ <finally_clause> ] "?}"
 <except_clause>::= "[!" [ <exception_target> ] "[/]" <block> "!]"
-<exception_target> ::= <id>                  ; (Optionally a pattern could be allowed here)
+<exception_target> ::= <id> | <pattern>     ; Enhanced with pattern matching
 <finally_clause>  ::= "[:~" <block> "~:]"
 
 ; ------------------------------------------------------------
-; Pattern Matching (Match–Case)
+; Pattern Matching
 ; ------------------------------------------------------------
 <match_stmt>   ::= "(-<" <expr> ">-)" { <case_block> }
 <case_block>   ::= "[<" <pattern> ">]" "[[" <stmt_list> "]]"
 
 <pattern>      ::= <literal>
                  | <id>
-                 | "(<" <pattern_list> ">)"    ; Tuple–pattern
+                 | "(<" <pattern_list> ">)"      ; Tuple pattern
+                 | "[+" <tensor_pattern> "+]"     ; Tensor pattern
+                 | "{+" <graph_pattern> "+}"      ; Graph pattern
+                 | "<+" <stream_pattern> "+>"     ; Stream pattern
+
 <pattern_list> ::= <pattern> { ",," <pattern> }
 
-<literal>      ::= <number> | <string>
+<tensor_pattern>::= <shape_spec> [ "::" <type_spec> ]
+<graph_pattern>::= <node_pattern> [ "::" <edge_pattern> ]
+<stream_pattern>::= <element_pattern> [ "::" <window_spec> ]
 
 ; ------------------------------------------------------------
-; Function Definitions with Type Annotations
+; Function System
 ; ------------------------------------------------------------
 <func_def>     ::= "(|" <id> <param_block> [ "->" <type_expr> ] "[[" <stmt_list> "]]" "|)"
-<async_func_def> ::= "(|" "~" <id> <param_block> [ "->" <type_expr> ] "[[" <stmt_list> "]]" "|)"
-; (Async functions are marked by a "~" immediately after "(|".)
+<async_func_def>::= "(|" "~" <id> <param_block> [ "->" <type_expr> ] "[[" <stmt_list> "]]" "|)"
 
 <param_block>  ::= "((" [ <param_list> ] "))"
 <param_list>   ::= <param> { ",," <param> }
-<param>        ::= <id> [ "(:)" <type_expr> ]       ; Optional type annotation
-<type_expr>    ::= <expr>                           ; Types are expressed as expressions
+<param>        ::= <id> [ "(:)" <type_expr> ]
+<type_expr>    ::= <expr>
 
 ; ------------------------------------------------------------
-; Macros for Metaprogramming
+; Metaprogramming
 ; ------------------------------------------------------------
 <macro_def>    ::= "<%|" <id> <param_block> "[[" <stmt_list> "]]" "|%>"
-<macro_call>   ::= <id> <arg_block>                 ; Macros are invoked like functions
+<macro_call>   ::= <id> <arg_block>
 
 ; ------------------------------------------------------------
-; Asynchronous Constructs
+; Parallel Processing
 ; ------------------------------------------------------------
-<await_expr>   ::= "~(" <expr> ")~"                ; Await expression
+<parallel_stmt>::= "<|" <parallel_spec> "[[" <stmt_list> "]]" "|>"
+<parallel_spec>::= "((" <thread_expr> "))" [ "::" <sync_spec> ]
+
+<thread_expr>  ::= <thread_count>
+                 | <thread_range>
+                 | <thread_pattern>
+
+<sync_spec>    ::= "[S" <sync_type> [ "::" <barrier_spec> ] "]"
 
 ; ------------------------------------------------------------
-; Compound Statements (Control Flow)
+; GPU Computing
 ; ------------------------------------------------------------
-<compound_stmt> ::= <if_stmt>
-                  | <loop_stmt>
-                  | <try_stmt>
-                  | <match_stmt>
-                  | <func_def>
-                  | <async_func_def>
-                  | <class_def>
-                  | <block>
+<gpu_stmt>     ::= "<%" <gpu_spec> "[[" <stmt_list> "]]" "%>"
+<gpu_spec>     ::= "((" <kernel_def> "))" [ "::" <grid_spec> ]
+
+<kernel_def>   ::= "[K" <func_def> "]"
+<grid_spec>    ::= "[G" <block_dim> "::" <thread_dim> "]"
+
+<block_dim>    ::= "(<" <expr> { ",," <expr> } ">)"
+<thread_dim>   ::= "[<" <expr> { ",," <expr> } ">]"
+
+; ------------------------------------------------------------
+; Tensor Operations
+; ------------------------------------------------------------
+<tensor_stmt>  ::= "[#" <tensor_spec> "[[" <stmt_list> "]]" "#]"
+<tensor_spec>  ::= "((" <shape_def> "))" [ "::" <device_spec> ]
+
+<shape_def>    ::= "<|" <dim_list> "|>"
+<dim_list>     ::= <expr> { ",," <expr> }
+
+<device_spec>  ::= "[D" <device_type> [ "::" <memory_spec> ] "]"
+<device_type>  ::= "!GPU" | "!TPU" | "!CPU" | "!DSP"
+
+; ------------------------------------------------------------
+; Neural Network Operations
+; ------------------------------------------------------------
+<nn_stmt>      ::= "<%%" <layer_spec> "[[" <stmt_list> "]]" "%%>"
+<layer_spec>   ::= "((" <layer_type> "))" [ "::" <activation_spec> ]
+
+<layer_type>   ::= <linear_layer>
+                 | <conv_layer>
+                 | <pool_layer>
+                 | <norm_layer>
+
+<linear_layer> ::= "[L" <dims> "]"
+<conv_layer>   ::= "[C" <kernel_spec> "]"
+<pool_layer>   ::= "[P" <pool_spec> "]"
+<norm_layer>   ::= "[N" <norm_spec> "]"
+
+; ------------------------------------------------------------
+; Memory Management
+; ------------------------------------------------------------
+<memory_stmt>  ::= "[^" <memory_spec> "^]"
+<memory_spec>  ::= "((" <alloc_type> "))" [ "::" <layout_spec> ]
+
+<alloc_type>   ::= "!STATIC" | "!DYNAMIC" | "!SHARED" | "!PINNED"
+<layout_spec>  ::= "[L" <layout_type> [ "::" <alignment_spec> ] "]"
+
+; ------------------------------------------------------------
+; Stream Processing
+; ------------------------------------------------------------
+<stream_stmt>  ::= "<~" <stream_spec> "[[" <stmt_list> "]]" "~>"
+<stream_spec>  ::= "((" <source_def> "))" [ "::" <window_spec> ]
+
+<source_def>   ::= <id> | <stream_expr>
+<window_spec>  ::= "[W" <size> ",," <stride> "]"
+
+; ------------------------------------------------------------
+; Compound Statements
+; ------------------------------------------------------------
+<compound_stmt>::= <if_stmt>
+                 | <loop_stmt>
+                 | <parallel_stmt>
+                 | <gpu_stmt>
+                 | <tensor_stmt>
+                 | <nn_stmt>
+                 | <stream_stmt>
+                 | <try_stmt>
+                 | <match_stmt>
+                 | <func_def>
+                 | <async_func_def>
+                 | <class_def>
+                 | <block>
 
 <block>        ::= "[[" <stmt_list> "]]"
 
 ; ------------------------------------------------------------
-; Conditionals
+; Control Structures
 ; ------------------------------------------------------------
 <if_stmt>      ::= "[?" <condition> <then_block> [ <else_clause> ] "?]"
 <condition>    ::= "((" <expr> "))"
 <then_block>   ::= "[[" <stmt_list> "]]"
 <else_clause>  ::= ":|:" "[[" <stmt_list> "]]"
 
-; ------------------------------------------------------------
-; Loops (WHILE–style)
-; ------------------------------------------------------------
 <loop_stmt>    ::= "<+" "((" <expr> "))" "[[" <stmt_list> "]]" "+>"
 
 ; ------------------------------------------------------------
-; Class Definitions (with Inheritance)
+; Class System
 ; ------------------------------------------------------------
 <class_def>    ::= "{|" <id> [ <inheritance_list> ] "[[" <stmt_list> "]]" "|}"
-<inheritance_list> ::= "([:" <inherit_list> ":])"
+<inheritance_list>::= "([:" <inherit_list> ":])"
 <inherit_list> ::= <expr> { ",," <expr> }
 
 ; ------------------------------------------------------------
-; Expressions
+; Expression System
 ; ------------------------------------------------------------
 <expr>         ::= <cond_expr>
                  | <arith_expr> { ( "++" | "--" ) <arith_expr> }
+                 | <tensor_expr>        ; New: Tensor expressions
+                 | <parallel_expr>      ; New: Parallel expressions
 
 <cond_expr>    ::= "[?" "((" <expr> "))" "[(" <expr> ")]" [ ":|:" "[(" <expr> ")]" ] "?]"
 
-; ------------------------------------------------------------
-; Arithmetic Expressions
-; ------------------------------------------------------------
 <arith_expr>   ::= <term> { ( "**" | "//" ) <term> }
 
 <term>         ::= [ <unary_op> ] <primary>
@@ -161,62 +232,50 @@
                  | <tuple_literal>
                  | <dict_literal>
                  | <set_literal>
+                 | <tensor_literal>     ; New: Tensor literals
                  | <call_expr>
                  | <lambda_expr>
                  | <await_expr>
                  | <macro_call>
                  | <id>
-                 | "((" <expr> "))"    ; Explicit grouping
-
-<call_expr>    ::= <id> <arg_block>
-<arg_block>    ::= "((" [ <arg_list> ] "))"
-<arg_list>     ::= <expr> { ",," <expr> }
-
-<lambda_expr>  ::= "(:<" [ <param_block> ] <lambda_body> ">:)"
-<lambda_body>  ::= <expr>
-                 | "[[" <stmt_list> "]]"
+                 | "((" <expr> "))"
 
 ; ------------------------------------------------------------
-; Collection Literals & Their Comprehensions
+; Collection System
 ; ------------------------------------------------------------
+<list_literal> ::= "[<" <list_content> ">]"
+<tuple_literal>::= "(<" <tuple_content> ">)"
+<dict_literal> ::= "{<" <dict_content> ">}"
+<set_literal>  ::= "[{" <set_content> "}]"
+<tensor_literal>::= "[@" <tensor_content> "@]"
 
-; --- List Literals ---
-<list_literal>  ::= "[<" <list_content> ">]"
-<list_content>  ::= <list_expr> | <list_comp>
-<list_expr>     ::= [ <expr> { ",," <expr> } ]    ; May be empty.
-<list_comp>     ::= <expr> <comp_clauses>
-
-; --- Tuple Literals ---
-<tuple_literal> ::= "(<" <tuple_content> ">)"
-<tuple_content> ::= <tuple_expr> | <tuple_comp>
-<tuple_expr>    ::= [ <expr> { ",," <expr> } ]
-<tuple_comp>    ::= <expr> <comp_clauses>
-
-; --- Dictionary Literals ---
-<dict_literal>  ::= "{<" <dict_content> ">}"
-<dict_content>  ::= <dict_expr> | <dict_comp>
-<dict_expr>     ::= [ <pair> { ",," <pair> } ]
-<pair>          ::= <expr> "[:]" <expr>
-<dict_comp>     ::= <pair> <comp_clauses>
-
-; --- Set Literals ---
-<set_literal>   ::= "[{" <set_content> "}]"
-<set_content>   ::= <set_expr> | <set_comp>
-<set_expr>      ::= [ <expr> { ",," <expr> } ]
-<set_comp>      ::= <expr> <comp_clauses>
+<list_content> ::= <list_expr> | <list_comp>
+<tuple_content>::= <tuple_expr> | <tuple_comp>
+<dict_content> ::= <dict_expr> | <dict_comp>
+<set_content>  ::= <set_expr> | <set_comp>
+<tensor_content>::= <tensor_expr> | <tensor_comp>
 
 ; ------------------------------------------------------------
-; Comprehension Clauses (for all collection types)
+; Comprehension System
 ; ------------------------------------------------------------
-<comp_clauses>  ::= <comp_clause> { <comp_clause> }
-<comp_clause>   ::= <for_clause> | <if_clause>
+<comp_clauses> ::= <comp_clause> { <comp_clause> }
+<comp_clause>  ::= <for_clause> 
+                 | <if_clause>
+                 | <where_clause>     ; New: Additional filtering
+                 | <group_clause>     ; New: Grouping operations
 
-<for_clause>    ::= "[:<" <iter_target> "[%]" <expr> ">:]"
-<iter_target>   ::= <id> { ",," <id> }
-<if_clause>     ::= "[?:" <expr> ":?]"
+<for_clause>   ::= "[:<" <iter_target> "[%]" <expr> ">:]"
+<if_clause>    ::= "[?:" <expr> ":?]"
+<where_clause> ::= "[?|" <expr> "|?]"
+<group_clause> ::= "[&|" <expr> "|&]"
 
 ; ------------------------------------------------------------
-; Literals
+; Asynchronous System
+; ------------------------------------------------------------
+<await_expr>   ::= "~(" <expr> ")~"
+
+; ------------------------------------------------------------
+; Basic Elements
 ; ------------------------------------------------------------
 <number>       ::= <digit> { <digit> }
 <digit>        ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
@@ -224,15 +283,14 @@
 <string>       ::= "\"" { <char> } "\""
 <char>         ::= any ASCII character except "\""
 
-; ------------------------------------------------------------
-; Identifiers
-; ------------------------------------------------------------
 <id>           ::= <sym> { <sym> }
 <sym>          ::= "!" | "@" | "#" | "$" | "%" | "^" | "&" | "*" 
                  | "_" | "=" | "+" | "-" | "/" | "?" | ":"
 
 ; ============================================================
-; Comments (handled at the lexer level)
+; Lexer-Level Features
 ; ============================================================
-; A comment begins with "/*" and ends with "*/".
+; - Comments: "/* ... */"
+; - Whitespace: Ignored except for separation
+; - Line continuation: Not needed (free-form)
 ; ============================================================
