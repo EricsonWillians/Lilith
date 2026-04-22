@@ -62,7 +62,7 @@ Value native_math_e(int argc, Value *argv) {
     return NUMBER_VAL(2.71828182845904523536);
 }
 
-Value native_math_random(int argc, Value *argv) {
+Value native_math_rand(int argc, Value *argv) {
     ensure_seed();
     if (argc >= 2 && IS_NUMBER(argv[0]) && IS_NUMBER(argv[1])) {
         int min = (int)AS_NUMBER(argv[0]);

@@ -7,6 +7,10 @@
 #include "stdlib/list.h"
 #include "stdlib/json.h"
 #include "stdlib/os.h"
+#include "stdlib/meta.h"
+#include "stdlib/seq.h"
+#include "stdlib/time.h"
+#include "stdlib/num.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,15 +66,6 @@ static Value value_str_concat(Value a, Value b) {
     return OBJ_VAL(obj_string_take(buf, alen + blen));
 }
 
-static Value make_string(const char *s) {
-    return OBJ_VAL(obj_string_copy(s, strlen(s)));
-}
-
-static Value native_clock(int argc, Value *argv) {
-    (void)argc; (void)argv;
-    return NUMBER_VAL((double)clock() / CLOCKS_PER_SEC);
-}
-
 static Value native_input(int argc, Value *argv) {
     if (argc >= 1) {
         value_print(argv[0]);
@@ -84,50 +79,6 @@ static Value native_input(int argc, Value *argv) {
     size_t n = strlen(line);
     if (n > 0 && line[n - 1] == '\n') line[n - 1] = '\0';
     return OBJ_VAL(obj_string_take(line, strlen(line)));
-}
-
-static Value native_type(int argc, Value *argv) {
-    if (argc == 0) return make_string("nil");
-    Value v = argv[0];
-    if (IS_NIL(v))    return make_string("nil");
-    if (IS_BOOL(v))   return make_string("bool");
-    if (IS_NUMBER(v)) return make_string("number");
-    if (IS_STRING(v)) return make_string("string");
-    if (IS_LIST(v))   return make_string("list");
-    if (IS_TUPLE(v))  return make_string("tuple");
-    if (IS_DICT(v))   return make_string("dict");
-    if (IS_FUNCTION(v)) return make_string("function");
-    if (IS_CLASS(v))  return make_string("class");
-    if (IS_INSTANCE(v)) return make_string("instance");
-    if (IS_NATIVE(v)) return make_string("native");
-    return make_string("unknown");
-}
-
-static Value native_len(int argc, Value *argv) {
-    if (argc == 0) return NUMBER_VAL(0);
-    Value v = argv[0];
-    if (IS_STRING(v)) return NUMBER_VAL((double)AS_STRING(v)->length);
-    if (IS_LIST(v))   return NUMBER_VAL((double)AS_LIST(v)->count);
-    if (IS_TUPLE(v))  return NUMBER_VAL((double)AS_TUPLE(v)->count);
-    if (IS_DICT(v))   return NUMBER_VAL((double)AS_DICT(v)->count);
-    return NUMBER_VAL(0);
-}
-
-static Value native_str(int argc, Value *argv) {
-    if (argc == 0) return make_string("");
-    return make_string(value_to_string(argv[0]));
-}
-
-static Value native_num(int argc, Value *argv) {
-    if (argc == 0) return NUMBER_VAL(0);
-    Value v = argv[0];
-    if (IS_NUMBER(v)) return v;
-    if (IS_STRING(v)) {
-        char *end;
-        double d = strtod(AS_STRING(v)->chars, &end);
-        if (*end == '\0') return NUMBER_VAL(d);
-    }
-    return NUMBER_VAL(0);
 }
 
 static Value native_print(int argc, Value *argv) {
@@ -156,15 +107,12 @@ void interpreter_init(Interpreter *interp) {
     interp->throw_flag = 0;
     interp->error_msg = NULL;
 
+    /* Sacred core: print & input */
     define_native(interp, "@!", native_print);
     define_native(interp, "print", native_print);
     define_native(interp, "input", native_input);
-    define_native(interp, "clock", native_clock);
-    define_native(interp, "type", native_type);
-    define_native(interp, "len", native_len);
-    define_native(interp, "str", native_str);
-    define_native(interp, "num", native_num);
 
+    /* Namespaced modules */
     define_native(interp, "http..get", native_http_get);
     define_native(interp, "io..read", native_file_read);
     define_native(interp, "io..write", native_file_write);
@@ -181,16 +129,16 @@ void interpreter_init(Interpreter *interp) {
     define_native(interp, "math..tan", native_math_tan);
     define_native(interp, "math..pi", native_math_pi);
     define_native(interp, "math..e", native_math_e);
-    define_native(interp, "math..random", native_math_random);
+    define_native(interp, "math..rand", native_math_rand);
 
     /* String */
-    define_native(interp, "str..len", native_str_len);
+    define_native(interp, "str..from", native_str_from);
     define_native(interp, "str..trim", native_str_trim);
     define_native(interp, "str..contains", native_str_contains);
-    define_native(interp, "str..starts_with", native_str_starts_with);
-    define_native(interp, "str..ends_with", native_str_ends_with);
+    define_native(interp, "str..starts", native_str_starts);
+    define_native(interp, "str..ends", native_str_ends);
     define_native(interp, "str..replace", native_str_replace);
-    define_native(interp, "str..substring", native_str_substring);
+    define_native(interp, "str..slice", native_str_slice);
     define_native(interp, "str..split", native_str_split);
     define_native(interp, "str..join", native_str_join);
 
@@ -204,11 +152,30 @@ void interpreter_init(Interpreter *interp) {
     define_native(interp, "json..encode", native_json_encode);
     define_native(interp, "json..decode", native_json_decode);
 
-    /* OS */
+    /* OS & Env */
     define_native(interp, "env..get", native_env_get);
     define_native(interp, "env..set", native_env_set);
     define_native(interp, "os..time", native_os_time);
     define_native(interp, "os..sleep", native_os_sleep);
+
+    /* Meta */
+    define_native(interp, "meta..type", native_meta_type);
+
+    /* Seq */
+    define_native(interp, "seq..len", native_seq_len);
+
+    /* Time */
+    define_native(interp, "time..clock", native_time_clock);
+
+    /* Num */
+    define_native(interp, "num..from", native_num_from);
+
+    /* Convenience aliases (shorthand for common namespaced functions) */
+    define_native(interp, "len", native_seq_len);
+    define_native(interp, "type", native_meta_type);
+    define_native(interp, "str", native_str_from);
+    define_native(interp, "num", native_num_from);
+    define_native(interp, "clock", native_time_clock);
 }
 
 void interpreter_free(Interpreter *interp) {
@@ -362,7 +329,7 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                     /* Native method dispatch */
                     if (strcmp(method_name, "length") == 0) {
                         free(args);
-                        return native_len(1, &obj);
+                        return native_seq_len(1, &obj);
                     }
                 }
 
@@ -480,7 +447,7 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
 
             if (IS_LIST(obj) || IS_STRING(obj) || IS_TUPLE(obj)) {
                 if (strcmp(name, "length") == 0) {
-                    return native_len(1, &obj);
+                    return native_seq_len(1, &obj);
                 }
             }
 
@@ -812,7 +779,7 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
                 if (node->as.try_stmt.catch_body) {
                     Environment *catch_env = env_new_enclosing(interp->env);
                     if (node->as.try_stmt.catch_var) {
-                        env_define(catch_env, node->as.try_stmt.catch_var, make_string(err));
+                        env_define(catch_env, node->as.try_stmt.catch_var, OBJ_VAL(obj_string_copy(err, strlen(err))));
                     }
                     Environment *prev = interp->env;
                     interp->env = catch_env;

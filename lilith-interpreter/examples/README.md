@@ -75,11 +75,23 @@ Most examples produce extensive runtime output so you can observe the interprete
 
 ---
 
-## Standard Library Reference
+## Standard Library Naming Doctrine
 
-The interpreter ships with a growing native standard library. All functions use the `..` namespace separator.
+The Lilith standard library follows a strict two-layer naming convention:
+
+> **Public natives are exposed as `domain..verb`, with short, concrete verbs and minimal underscores.**
+
+A tiny set of sacred core forms remain global for ergonomics. Everything else lives in a namespace.
+
+### Sacred Core (global)
+
+| Function | Description |
+|----------|-------------|
+| `@!` / `print` | Print arguments separated by spaces, with newline. |
+| `input(prompt?)` | Read a line from stdin. |
 
 ### I/O & HTTP
+
 | Function | Description |
 |----------|-------------|
 | `http..get(url)` | Blocking HTTP/1.0 GET. Returns response body string or `nil`. |
@@ -87,6 +99,7 @@ The interpreter ships with a growing native standard library. All functions use 
 | `io..write(path, contents)` | Writes string to file. Returns `true`/`false`. |
 
 ### Math
+
 | Function | Description |
 |----------|-------------|
 | `math..abs(n)` | Absolute value. |
@@ -99,23 +112,25 @@ The interpreter ships with a growing native standard library. All functions use 
 | `math..tan(n)` | Tangent (radians). |
 | `math..pi()` | Returns π. |
 | `math..e()` | Returns e. |
-| `math..random()` | Random float [0,1). |
-| `math..random(min, max)` | Random integer [min, max). |
+| `math..rand()` | Random float [0,1). |
+| `math..rand(min, max)` | Random integer [min, max). |
 
 ### String
+
 | Function | Description |
 |----------|-------------|
-| `str..len(s)` | String length. |
+| `str..from(value)` | Convert any value to string. |
 | `str..trim(s)` | Remove leading/trailing whitespace. |
 | `str..contains(s, sub)` | Returns `true` if `s` contains `sub`. |
-| `str..starts_with(s, prefix)` | Returns `true` if `s` starts with `prefix`. |
-| `str..ends_with(s, suffix)` | Returns `true` if `s` ends with `suffix`. |
+| `str..starts(s, prefix)` | Returns `true` if `s` starts with `prefix`. |
+| `str..ends(s, suffix)` | Returns `true` if `s` ends with `suffix`. |
 | `str..replace(s, from, to)` | Replace all occurrences of `from` with `to`. |
-| `str..substring(s, start, end)` | Extract substring `[start, end)`. |
+| `str..slice(s, start, end?)` | Extract substring `[start, end)`. |
 | `str..split(s, delim)` | Split string into a list. |
 | `str..join(delim, list)` | Join list of strings with delimiter. |
 
 ### List
+
 | Function | Description |
 |----------|-------------|
 | `list..push(list, item)` | Append item. Returns `true`. |
@@ -124,12 +139,14 @@ The interpreter ships with a growing native standard library. All functions use 
 | `list..sort(list)` | Sort list in-place (numbers or strings). |
 
 ### JSON
+
 | Function | Description |
 |----------|-------------|
 | `json..encode(value)` | Encode value (nil, bool, number, string, list, dict) to JSON string. |
 | `json..decode(string)` | Parse JSON string into Lilith values. |
 
 ### OS & Environment
+
 | Function | Description |
 |----------|-------------|
 | `env..get(name)` | Get environment variable or `nil`. |
@@ -138,16 +155,41 @@ The interpreter ships with a growing native standard library. All functions use 
 | `os..sleep(seconds)` | Sleep for N seconds. |
 | `sys..exit(code)` | Terminate process. |
 
-### Core Built-ins
+### Meta
+
 | Function | Description |
 |----------|-------------|
-| `@!` / `print` | Print arguments separated by spaces, with newline. |
-| `input(prompt?)` | Read a line from stdin. |
-| `clock()` | CPU time in seconds. |
-| `type(value)` | Return type name as string. |
-| `len(value)` | Length of string, list, tuple, or dict. |
-| `str(value)` | Convert value to string. |
-| `num(value)` | Convert string to number. |
+| `meta..type(value)` | Return type name as string. |
+
+### Sequence
+
+| Function | Description |
+|----------|-------------|
+| `seq..len(value)` | Length of string, list, tuple, or dict. |
+
+### Time
+
+| Function | Description |
+|----------|-------------|
+| `time..clock()` | CPU time in seconds. |
+
+### Number
+
+| Function | Description |
+|----------|-------------|
+| `num..from(value)` | Convert string to number. |
+
+### Convenience Aliases
+
+The following globals are aliases to their namespaced counterparts for ergonomic code:
+
+| Alias | Maps to |
+|-------|---------|
+| `len` | `seq..len` |
+| `type` | `meta..type` |
+| `str` | `str..from` |
+| `num` | `num..from` |
+| `clock` | `time..clock` |
 
 ---
 
@@ -161,7 +203,7 @@ The interpreter ships with a growing native standard library. All functions use 
 | Expression group | `(( expr ))` |
 | Function | `(| name ((params)) [[ body ]] \|)` |
 | Async function | `(| ~ name ((params)) [[ body ]] \|)` |
-| Class | `{| Name ([: bases :]) [[ methods ]] \|}` |
+| Class | `{\| Name ([: bases :]) [[ methods ]] \|}` |
 | If statement | `[?((cond)) [[then]] :|: [[else]] ?]` |
 | While loop | `<+((cond)) [[ body ]]+>` |
 | Return | `)- expr -(` |
@@ -176,7 +218,7 @@ The interpreter ships with a growing native standard library. All functions use 
 | Match | `(-< expr >-) [<pat>] [[ body ]]` |
 | Try | `{? [[try]] [! err [/] [[catch]] !] [:~ [[finally]] ~:] ?}` |
 | Import | `<{ mod1,, mod2 }>` |
-| Parallel | `<| ((spec)) [[ body ]] \|>` |
+| Parallel | `<\| ((spec)) [[ body ]] \|>` |
 | GPU | `<% ((spec)) [[ body ]] %>` |
 | Tensor | `[# ((spec)) [[ body ]] #]` |
 | Stream | `<~ ((spec)) [[ body ]] ~>` |

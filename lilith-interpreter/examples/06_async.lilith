@@ -15,7 +15,7 @@
     @!(("Awaiting fetch_data..."))
     data [=] ~(fetch_data(("http://httpbin.org/get")))~
     @!(("Response first 80 chars:"))
-    @!((str..substring((data,, 0,, 80))))
+    @!((str..slice((data,, 0,, 80))))
 
     /* Parse JSON response */
     parsed [=] json..decode((data))

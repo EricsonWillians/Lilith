@@ -50,7 +50,7 @@
     raw [=] "  hello world  "
     @!(("trim =",, str..trim((raw))))
     @!(("contains world =",, str..contains((raw,, "world"))))
-    @!(("starts_with spaces =",, str..starts_with((raw,, "  "))))
+    @!(("starts_with spaces =",, str..starts((raw,, "  "))))
     @!(("replace spaces with - =",, str..replace((raw,, " ",, "-"))))
-    @!(("substring(3..8) =",, str..substring((raw,, 3,, 8))))
+    @!(("slice(3..8) =",, str..slice((raw,, 3,, 8))))
 ]}

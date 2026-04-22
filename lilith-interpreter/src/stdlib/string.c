@@ -3,9 +3,9 @@
 #include <string.h>
 #include <ctype.h>
 
-Value native_str_len(int argc, Value *argv) {
-    if (argc < 1 || !IS_STRING(argv[0])) return NUMBER_VAL(0);
-    return NUMBER_VAL((double)AS_STRING(argv[0])->length);
+Value native_str_from(int argc, Value *argv) {
+    if (argc == 0) return OBJ_VAL(obj_string_copy("", 0));
+    return OBJ_VAL(obj_string_copy(value_to_string(argv[0]), strlen(value_to_string(argv[0]))));
 }
 
 Value native_str_trim(int argc, Value *argv) {
@@ -22,14 +22,14 @@ Value native_str_contains(int argc, Value *argv) {
     return BOOL_VAL(strstr(AS_STRING(argv[0])->chars, AS_STRING(argv[1])->chars) != NULL);
 }
 
-Value native_str_starts_with(int argc, Value *argv) {
+Value native_str_starts(int argc, Value *argv) {
     if (argc < 2 || !IS_STRING(argv[0]) || !IS_STRING(argv[1])) return BOOL_VAL(0);
     const char *s = AS_STRING(argv[0])->chars;
     const char *prefix = AS_STRING(argv[1])->chars;
     return BOOL_VAL(strncmp(s, prefix, strlen(prefix)) == 0);
 }
 
-Value native_str_ends_with(int argc, Value *argv) {
+Value native_str_ends(int argc, Value *argv) {
     if (argc < 2 || !IS_STRING(argv[0]) || !IS_STRING(argv[1])) return BOOL_VAL(0);
     const char *s = AS_STRING(argv[0])->chars;
     const char *suffix = AS_STRING(argv[1])->chars;
@@ -77,7 +77,7 @@ Value native_str_replace(int argc, Value *argv) {
     return OBJ_VAL(obj_string_take(result, (size_t)(dst - result)));
 }
 
-Value native_str_substring(int argc, Value *argv) {
+Value native_str_slice(int argc, Value *argv) {
     if (argc < 2 || !IS_STRING(argv[0]) || !IS_NUMBER(argv[1])) return argv[0];
     const char *s = AS_STRING(argv[0])->chars;
     size_t len = AS_STRING(argv[0])->length;

@@ -13,6 +13,6 @@ Value native_math_cos(int argc, Value *argv);
 Value native_math_tan(int argc, Value *argv);
 Value native_math_pi(int argc, Value *argv);
 Value native_math_e(int argc, Value *argv);
-Value native_math_random(int argc, Value *argv);
+Value native_math_rand(int argc, Value *argv);
 
 #endif
