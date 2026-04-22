@@ -1,18 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Gather all test source files in the tests directory.
-file(GLOB TEST_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
+# Gather all source files from src (excluding main.c which has its own main).
+file(GLOB_RECURSE SRC_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/*.c"
 )
+list(REMOVE_ITEM SRC_SOURCES "${CMAKE_SOURCE_DIR}/src/main.c")
 
-# Create the tests executable.
-add_executable(lilith_tests ${TEST_SOURCES})
+# Build lexer tests separately.
+add_executable(test_lexer test_lexer.c ${SRC_SOURCES})
+target_include_directories(test_lexer PRIVATE ${CMAKE_SOURCE_DIR}/src)
+add_test(NAME LexerTests COMMAND test_lexer)
 
-# Include the main src directory so that test files can see all project headers.
-target_include_directories(lilith_tests PRIVATE ${CMAKE_SOURCE_DIR}/src)
-
-# If you have built a library target (e.g., lilith_static), you could link it here:
-# target_link_libraries(lilith_tests PRIVATE lilith_static)
-
-# Register the tests with CTest.
-add_test(NAME AllTests COMMAND lilith_tests)
+# Build parser tests separately.
+add_executable(test_parser test_parser.c ${SRC_SOURCES})
+target_include_directories(test_parser PRIVATE ${CMAKE_SOURCE_DIR}/src)
+add_test(NAME ParserTests COMMAND test_parser)
