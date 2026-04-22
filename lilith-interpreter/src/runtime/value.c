@@ -185,9 +185,11 @@ void dict_set(ObjDict *dict, ObjString *key, Value value) {
     }
     DictEntry *entry = dict_find_entry(dict->entries, dict->capacity, key);
     bool is_new = entry->key == NULL;
-    entry->key = key;
+    if (is_new) {
+        entry->key = key;
+        dict->count++;
+    }
     entry->value = value;
-    if (is_new) dict->count++;
 }
 
 bool dict_get(ObjDict *dict, ObjString *key, Value *value) {

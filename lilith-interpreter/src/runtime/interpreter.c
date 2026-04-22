@@ -379,16 +379,16 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
             if (IS_CLASS(callee)) {
                 ObjClass *klass = AS_CLASS(callee);
                 ObjInstance *inst = obj_instance_new(klass);
-                free(args);
                 /* Call init if present */
                 Value init_val;
                 if (dict_get(klass->methods, obj_string_copy("init", 4), &init_val) && IS_FUNCTION(init_val)) {
                     ObjFunction *init = AS_FUNCTION(init_val);
                     Environment *call_env = env_new_enclosing(interp->globals);
                     env_define(call_env, "self", OBJ_VAL(inst));
-                    for (size_t i = 0; i < init->param_count && i < arg_count; i++) {
-                        env_define(call_env, init->params[i], args[i]);
+                    for (size_t i = 1; i < init->param_count && (i - 1) < arg_count; i++) {
+                        env_define(call_env, init->params[i], args[i - 1]);
                     }
+                    free(args);
                     Environment *prev = interp->env;
                     interp->env = call_env;
                     interp->return_flag = 0;
@@ -396,6 +396,8 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                     interp->return_flag = 0;
                     env_free(call_env);
                     interp->env = prev;
+                } else {
+                    free(args);
                 }
                 return OBJ_VAL(inst);
             }
