@@ -50,3 +50,10 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Build directories
+build/
+lilith-interpreter/build/
+
+# Build lockfile
+.build.lock
