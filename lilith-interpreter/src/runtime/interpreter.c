@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include "interpreter.h"
 #include "gc.h"
+#include "stdlib/io.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -158,6 +159,11 @@ void interpreter_init(Interpreter *interp) {
     define_native(interp, "len", native_len);
     define_native(interp, "str", native_str);
     define_native(interp, "num", native_num);
+
+    define_native(interp, "http_get", native_http_get);
+    define_native(interp, "file_read", native_file_read);
+    define_native(interp, "file_write", native_file_write);
+    define_native(interp, "exit", native_exit);
 }
 
 void interpreter_free(Interpreter *interp) {

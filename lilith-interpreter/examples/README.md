@@ -63,7 +63,7 @@ Most examples produce extensive runtime output so you can observe the interprete
 | `03_expressions.lilith` | Arithmetic (`++` `--` `**` `//` `%%`), unary (`:-:`), comparison (`==` `!=` `<<` `>>`), grouping `((…))`, ternary conditional expression | Working |
 | `04_control_flow.lilith` | `if` / `else`, `while` loops, `break`, `continue` | Working |
 | `05_functions.lilith` | Function definition `(| … |)`, parameters, `return`, nested calls | Working |
-| `06_async.lilith` | Async functions `(| ~ … |)`, `await` `~(…)~`, `yield` `)-? … ?-(` | Parses; fails at runtime on `http_get` |
+| `06_async.lilith` | Async functions `(| ~ … |)`, `await` `~(…)~`, `yield` `)-? … ?-(` | Working |
 | `07_collections.lilith` | List `[<…>]`, tuple `(<…>)`, dict `{<…>}`, set `[{…}]`, comprehensions, index `a[i]`, member `obj.prop` | Working |
 | `08_classes.lilith` | Class definition `{| … |}`, inheritance `([: … :])`, methods, `self` | Working |
 | `09_pattern_matching.lilith` | `match` statement `(-< … >-)`, literal and tuple patterns | Working |
@@ -110,7 +110,7 @@ Most examples produce extensive runtime output so you can observe the interprete
 
 ## Notes & Limitations
 
-* **Runtime execution** — The interpreter now evaluates expressions, calls functions, and produces output. Native functions such as `@!` (print), `input`, `clock`, `type`, `len`, `str`, and `num` are available.
+* **Runtime execution** — The interpreter now evaluates expressions, calls functions, and produces output. Native functions such as `@!` / `print`, `input`, `clock`, `type`, `len`, `str`, `num`, `http_get`, `file_read`, `file_write`, and `exit` are available.
 * **Numbers** — Only integer literals are supported at this time. Floating-point and negative literal syntax (`-5`) are not yet lexed; use `:-:` for unary negation.
 * **String escapes** — Escape sequences inside strings are not processed; write literal characters only.
 * **Empty collections** — Empty list/tuple/dict/set literals may not parse correctly; include at least one element.

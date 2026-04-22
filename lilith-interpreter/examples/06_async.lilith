@@ -13,8 +13,10 @@
 
     /* Await expression */
     @!(("Awaiting fetch_data..."))
-    data [=] ~(fetch_data(("api.example.com")))~
-    @!(("Await result =",, data))
+    data [=] ~(fetch_data(("http://example.com")))~
+    @!(("Await result length =",, len((data))))
+    @!(("First 120 chars:"))
+    @!((data))
 
     /* Generator-style async function with yield */
     (| ~ counter (())
