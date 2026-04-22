@@ -1,24 +1,47 @@
 {[
+    @!(("=== 02_variables ==="))
+
     /* Integer literals */
     count [=] 42
+    @!(("count =",, count))
+
     zero [=] 0
+    @!(("zero =",, zero))
+
     large [=] 999999
+    @!(("large =",, large))
 
     /* String literals */
     greeting [=] "Hello"
+    @!(("greeting =",, greeting))
+
     target [=] "Lilith"
+    @!(("target =",, target))
+
     empty_string [=] ""
+    @!(("empty_string length =",, len((empty_string))))
 
     /* Boolean literals */
     active [=] #true
+    @!(("active =",, active))
+
     inactive [=] #false
+    @!(("inactive =",, inactive))
 
     /* Nil literal */
     nothing [=] nil
+    @!(("nothing =",, nothing))
+    @!(("type(nothing) =",, type((nothing))))
 
     /* Reassignment */
+    @!(("Reassigning count..."))
     count [=] 100
+    @!(("count now =",, count))
 
     /* Parallel assignment via tuple destructuring */
     (<x,, y,, z>) [=] (<1,, 2,, 3>)
+    @!(("Tuple destructuring:"))
+    @!(("  x =",, x))
+    @!(("  y =",, y))
+    @!(("  z =",, z))
 ]}

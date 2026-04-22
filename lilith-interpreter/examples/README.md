@@ -32,7 +32,9 @@ This produces the `lilith` executable inside `build/`.
 
 Output:
 ```
+=== 01_hello_world ===
 Hello, World!
+Program finished successfully.
 ```
 
 ---
@@ -48,28 +50,28 @@ for f in examples/*.lilith; do
 done
 ```
 
-Most examples will produce runtime output. A few reference external native functions (e.g., `http_get`, `compute_parallel`) that are not yet implemented and will raise a runtime error.
+Most examples produce extensive runtime output so you can observe the interpreter executing step-by-step.
 
 ---
 
 ## Example Index
 
-| File | Feature Category |
-|------|------------------|
-| `01_hello_world.lilith` | Program structure (`{[ … ]}`), print expression |
-| `02_variables.lilith` | Integer, string, boolean (`#true` / `#false`), `nil`, reassignment, tuple destructuring |
-| `03_expressions.lilith` | Arithmetic (`++` `--` `**` `//` `%%`), unary (`:-:`), comparison (`==` `!=` `<<` `>>`), grouping `((…))`, ternary conditional expression |
-| `04_control_flow.lilith` | `if` / `else`, `while` loops, `break`, `continue` |
-| `05_functions.lilith` | Function definition `(| … |)`, parameters, `return`, nested calls |
-| `06_async.lilith` | Async functions `(| ~ … |)`, `await` `~(…)~`, `yield` `)-? … ?-(` |
-| `07_collections.lilith` | List `[<…>]`, tuple `(<…>)`, dict `{<…>}`, set `[{…}]`, comprehensions, index `a[i]`, member `obj.prop` |
-| `08_classes.lilith` | Class definition `{| … |}`, inheritance `([: … :])`, methods, `self` |
-| `09_pattern_matching.lilith` | `match` statement `(-< … >-)`, literal and tuple patterns |
-| `10_exceptions.lilith` | `try` / `except` / `finally` blocks |
-| `11_hpc.lilith` | Parallel `<|…|>`, GPU `<%…%>`, tensor `[#…#]`, stream `<~…~>`, memory `[^…^]` |
-| `12_imports.lilith` | Module imports `<{ … }>` |
-| `13_lambdas.lilith` | Lambda expressions `(:< … >:)` |
-| `14_advanced.lilith` | Nested functions, nested HPC inside loops, async + HPC combined, complex comprehensions |
+| File | Feature Category | Status |
+|------|------------------|--------|
+| `01_hello_world.lilith` | Program structure (`{[ … ]}`), print expression | Working |
+| `02_variables.lilith` | Integer, string, boolean (`#true` / `#false`), `nil`, reassignment, tuple destructuring | Working |
+| `03_expressions.lilith` | Arithmetic (`++` `--` `**` `//` `%%`), unary (`:-:`), comparison (`==` `!=` `<<` `>>`), grouping `((…))`, ternary conditional expression | Working |
+| `04_control_flow.lilith` | `if` / `else`, `while` loops, `break`, `continue` | Working |
+| `05_functions.lilith` | Function definition `(| … |)`, parameters, `return`, nested calls | Working |
+| `06_async.lilith` | Async functions `(| ~ … |)`, `await` `~(…)~`, `yield` `)-? … ?-(` | Parses; fails at runtime on `http_get` |
+| `07_collections.lilith` | List `[<…>]`, tuple `(<…>)`, dict `{<…>}`, set `[{…}]`, comprehensions, index `a[i]`, member `obj.prop` | Working |
+| `08_classes.lilith` | Class definition `{| … |}`, inheritance `([: … :])`, methods, `self` | Working |
+| `09_pattern_matching.lilith` | `match` statement `(-< … >-)`, literal and tuple patterns | Working |
+| `10_exceptions.lilith` | `try` / `except` / `finally` blocks | Working; catches expected errors from `risky_operation`, `open`, `close` |
+| `11_hpc.lilith` | Parallel `<|…|>`, GPU `<%…%>`, tensor `[#…#]`, stream `<~…~>`, memory `[^…^]` | Parses; fails at runtime on undefined HPC natives |
+| `12_imports.lilith` | Module imports `<{ … }>` | Working (parsed as no-op) |
+| `13_lambdas.lilith` | Lambda expressions `(:< … >:)` | Working; lambdas currently return `nil` (no implicit return) |
+| `14_advanced.lilith` | Nested functions, nested HPC inside loops, async + HPC combined, complex comprehensions | Partial; fails at runtime on undefined HPC natives |
 
 ---
 
@@ -114,3 +116,4 @@ Most examples will produce runtime output. A few reference external native funct
 * **Empty collections** — Empty list/tuple/dict/set literals may not parse correctly; include at least one element.
 * **Macros, type annotations, and compile-time features** from the full grammar specification are reserved for future implementation and are not exercised here.
 * **HPC blocks** — Parallel, GPU, tensor, stream, and memory blocks are parsed and their bodies are executed, but the surrounding HPC directives are currently no-ops.
+* **Lambda returns** — Lambda bodies do not yet implicitly return their last expression; explicit `)- expr -(` is required inside the body to return a value.

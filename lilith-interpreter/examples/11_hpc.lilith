@@ -1,31 +1,49 @@
 {[
+    @!(("=== 11_hpc ==="))
+
     /* Parallel processing block */
+    @!(("Entering parallel block"))
     <| ((4)) [[
-        @!(("Running in parallel"))
+        @!(("  Running in parallel"))
         compute_parallel(())
     ]] |>
+    @!(("Exited parallel block"))
 
     /* GPU kernel block */
+    @!(("Entering GPU block"))
     <% ((grid,, block)) [[
+        @!(("  GPU kernel executing"))
         i [=] thread_id(())
         data[i] [=] data[i] ** 2
     ]] %>
+    @!(("Exited GPU block"))
 
     /* Tensor computation block */
+    @!(("Entering tensor block"))
     [# ((shape,, device)) [[
+        @!(("  Tensor block executing"))
         tensor [=] allocate_tensor((shape))
         fill_tensor((tensor,, 0))
     ]] #]
+    @!(("Exited tensor block"))
 
     /* Stream processing block */
+    @!(("Entering stream block"))
     <~ ((source,, window)) [[
+        @!(("  Stream block executing"))
         value [=] process_window((window))
         emit((value))
     ]] ~>
+    @!(("Exited stream block"))
 
     /* Memory management block */
+    @!(("Entering memory block"))
     [^ ((type,, align)) [[
+        @!(("  Memory block executing"))
         buffer [=] allocate_buffer((size))
         zero_buffer((buffer))
     ]] ^]
+    @!(("Exited memory block"))
+
+    @!(("HPC demo complete."))
 ]}

@@ -1,27 +1,53 @@
 {[
+    @!(("=== 03_expressions ==="))
+
     /* Arithmetic operators */
     a [=] 5 ++ 3
+    @!(("5 ++ 3 =",, a))
+
     b [=] 10 -- 2
+    @!(("10 -- 2 =",, b))
+
     c [=] 4 ** 3
+    @!(("4 ** 3 =",, c))
+
     d [=] 20 // 4
+    @!(("20 // 4 =",, d))
+
     e [=] 17 %% 5
+    @!(("17 %% 5 =",, e))
 
     /* Unary negation */
     neg [=] :-:10
+    @!((":-:10 =",, neg))
 
     /* Comparison operators */
     eq [=] 5 == 5
+    @!(("5 == 5 =",, eq))
+
     ne [=] 5 != 3
+    @!(("5 != 3 =",, ne))
+
     lt [=] 3 << 5
+    @!(("3 << 5 =",, lt))
+
     gt [=] 10 >> 2
+    @!(("10 >> 2 =",, gt))
 
     /* Grouping with ((...)) */
     grouped [=] ((2 ++ 3)) ** 4
+    @!(("((2 ++ 3)) ** 4 =",, grouped))
 
     /* Conditional expression */
     result [=] [?((5 >> 3))[(10)] :|: [(20)] ?]
+    @!(("Conditional 5>>3 ->",, result))
 
     /* Nested conditional expression */
     flag [=] #true
     value [=] [?((flag == #true))[(100)] :|: [(0)] ?]
+    @!(("Conditional flag=#true ->",, value))
+
+    flag [=] #false
+    value [=] [?((flag == #true))[(100)] :|: [(0)] ?]
+    @!(("Conditional flag=#false ->",, value))
 ]}

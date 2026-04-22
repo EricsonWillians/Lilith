@@ -1,4 +1,6 @@
 {[
     /* A minimal Lilith program */
+    @!(("=== 01_hello_world ==="))
     @!(("Hello, World!"))
+    @!(("Program finished successfully."))
 ]}

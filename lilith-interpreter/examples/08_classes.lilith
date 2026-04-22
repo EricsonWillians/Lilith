@@ -1,15 +1,19 @@
 {[
+    @!(("=== 08_classes ==="))
+
     /* Base class definition */
     {| Animal
         [[
             (| init ((self,, name))
                 [[
+                    @!(("  Animal.init called with name=",, name))
                     self.name [=] name
                 ]]
             |)
 
             (| speak ((self))
                 [[
+                    @!(("  Animal.speak invoked"))
                     )- "..." -(
                 ]]
             |)
@@ -19,14 +23,23 @@
     /* Derived class with inheritance */
     {| Dog ([: Animal :])
         [[
+            (| init ((self,, name))
+                [[
+                    @!(("  Dog.init called with name=",, name))
+                    self.name [=] name
+                ]]
+            |)
+
             (| speak ((self))
                 [[
+                    @!(("  Dog.speak invoked"))
                     )- "Woof!" -(
                 ]]
             |)
 
             (| fetch ((self,, item))
                 [[
+                    @!(("  Dog.fetch called with item=",, item))
                     @!(("Fetching"))
                     )- item -(
                 ]]
@@ -35,7 +48,17 @@
     |}
 
     /* Member access on objects */
-    dog [=] Dog(())
-    name [=] dog.name(())
+    @!(("Creating Dog instance..."))
+    dog [=] Dog(("Buddy"))
+    @!(("dog created"))
+
+    @!(("dog.name =",, dog.name))
+
+    @!(("Calling dog.speak(())..."))
     sound [=] dog.speak(())
+    @!(("dog.speak returned:",, sound))
+
+    @!(("Calling dog.fetch((ball))..."))
+    fetched [=] dog.fetch(("ball"))
+    @!(("dog.fetch returned:",, fetched))
 ]}

@@ -1,39 +1,48 @@
 {[
+    @!(("=== 04_control_flow ==="))
+
     x [=] 0
+    @!(("Initial x =",, x))
 
     /* If statement */
     [?((x == 0))
         [[
-            @!(("x is zero"))
+            @!(("Branch: x is zero"))
         ]]
         :|:
         [[
-            @!(("x is not zero"))
+            @!(("Branch: x is not zero"))
         ]]
     ?]
 
     /* While loop */
+    @!(("While loop: x << 5"))
     <+((x << 5))
         [[
             x [=] x ++ 1
-            @!((x))
+            @!(("  x incremented to",, x))
         ]]
     +>
+    @!(("Loop finished, x =",, x))
 
     /* Loop with break */
+    @!(("Break loop: y until 3"))
     y [=] 0
     <+((#true))
         [[
             [?((y == 3))
                 [[
+                    @!(("  Breaking at y =",, y))
                     ]-!
                 ]]
             ?]
             y [=] y ++ 1
         ]]
     +>
+    @!(("Break loop finished, y =",, y))
 
     /* Continue statement */
+    @!(("Continue loop: odd z values only"))
     z [=] 0
     <+((z << 5))
         [[
@@ -43,7 +52,8 @@
                     ]-?
                 ]]
             ?]
-            @!((z))
+            @!(("  z =",, z))
         ]]
     +>
+    @!(("Continue loop finished, z =",, z))
 ]}

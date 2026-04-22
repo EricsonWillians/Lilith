@@ -1,17 +1,21 @@
 {[
+    @!(("=== 05_functions ==="))
+
     /* Basic function with two parameters */
     (| add ((a,, b))
         [[
+            @!(("  add() called with a=",, a,, "b=",, b))
             )- a ++ b -(
         ]]
     |)
 
     result [=] add((5,, 3))
-    @!((result))
+    @!(("add((5,, 3)) =",, result))
 
     /* Function with no parameters */
     (| say_hello (())
         [[
+            @!(("  say_hello() invoked"))
             @!(("Hello!"))
         ]]
     |)
@@ -21,19 +25,27 @@
     /* Function with single parameter */
     (| square ((n))
         [[
+            @!(("  square() called with n=",, n))
             )- n ** n -(
         ]]
     |)
 
+    sq [=] square((4))
+    @!(("square((4)) =",, sq))
+
     /* Nested function calls */
+    @!(("Nested: add((square((2)),, square((3))))"))
     sum [=] add((square((2)),, square((3))))
+    @!(("Result =",, sum))
 
     /* Function returning a string */
     (| greet ((name))
         [[
+            @!(("  greet() called with name=",, name))
             )- "Hello " ++ name -(
         ]]
     |)
 
     msg [=] greet(("World"))
+    @!(("greet((World)) =",, msg))
 ]}

@@ -1,14 +1,35 @@
 {[
+    @!(("=== 13_lambdas ==="))
+
     /* Simple lambda with one parameter */
     inc [=] (:< ((x)) [[ x ++ 1 ]] >:)
+    @!(("inc defined"))
+    r1 [=] inc((5))
+    @!(("inc((5)) =",, r1))
 
     /* Lambda with multiple parameters */
     mul [=] (:< ((a,, b)) [[ a ** b ]] >:)
+    @!(("mul defined"))
+    r2 [=] mul((2,, 8))
+    @!(("mul((2,, 8)) =",, r2))
 
     /* Lambda called immediately */
     result [=] (:< ((n)) [[ n ** 2 ]] >:)((5))
+    @!(("Immediate lambda result =",, result))
 
     /* Lambda assigned and called later */
     double [=] (:< ((x)) [[ x ++ x ]] >:)
+    @!(("double defined"))
     val [=] double((7))
+    @!(("double((7)) =",, val))
+
+    /* Lambda as argument */
+    (| apply ((f,, v))
+        [[
+            @!(("  apply() calling f with v=",, v))
+            )- f((v)) -(
+        ]]
+    |)
+    r3 [=] apply((inc,, 10))
+    @!(("apply((inc,, 10)) =",, r3))
 ]}

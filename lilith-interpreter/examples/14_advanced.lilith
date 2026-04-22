@@ -1,31 +1,52 @@
 {[
+    @!(("=== 14_advanced ==="))
+
     /* Nested function definitions */
     (| outer ((x))
         [[
+            @!(("  outer() called with x=",, x))
             (| inner ((y))
                 [[
+                    @!(("    inner() called with y=",, y))
                     )- x ++ y -(
                 ]]
             |)
-
+            @!(("  calling inner((10))..."))
             )- inner((10)) -(
         ]]
     |)
 
+    @!(("Calling outer((5))..."))
+    outer_result [=] outer((5))
+    @!(("outer((5)) =",, outer_result))
+
     /* Conditional expression in assignment */
     flag [=] #true
+    @!(("flag =",, flag))
     value [=] [?((flag == #true))[(100)] :|: [(0)] ?]
+    @!(("Conditional flag=#true ->",, value))
+
+    flag [=] #false
+    @!(("flag now =",, flag))
+    value [=] [?((flag == #true))[(100)] :|: [(0)] ?]
+    @!(("Conditional flag=#false ->",, value))
 
     /* Complex collection operations with comprehensions */
     data [=] [<1,, 2,, 3,, 4,, 5>]
+    @!(("data =",, data))
+
     mapped [=] [< x ** 2 [:< x [%] data >:] >]
+    @!(("mapped =",, mapped))
+
     filtered [=] [< x [:< x [%] data >:] [?: x %% 2 == 1 :?] >]
+    @!(("filtered =",, filtered))
 
     /* Class with methods using member access */
     {| Counter
         [[
             (| init ((self))
                 [[
+                    @!(("  Counter.init called"))
                     self.count [=] 0
                 ]]
             |)
@@ -33,17 +54,27 @@
             (| increment ((self))
                 [[
                     self.count [=] self.count ++ 1
+                    @!(("  Counter.increment: count now =",, self.count))
                     )- self.count -(
                 ]]
             |)
         ]]
     |}
 
+    counter [=] Counter(())
+    @!(("counter.count =",, counter.count))
+    counter.increment(())
+    counter.increment(())
+    counter.increment(())
+
     /* HPC block nested inside a loop */
+    @!(("HPC block inside loop:"))
     i [=] 0
     <+((i << 3))
         [[
+            @!(("  Loop iteration i=",, i))
             <| ((4)) [[
+                @!(("    Parallel block for i=",, i))
                 compute((i))
             ]] |>
             i [=] i ++ 1
@@ -53,16 +84,22 @@
     /* Async function with await and HPC */
     (| ~ process_async ((items))
         [[
+            @!(("  process_async started"))
             <+((i << items.length(())))
                 [[
                     item [=] items[i]
+                    @!(("  Processing item=",, item))
                     result [=] ~(compute_async((item)))~
                     <| ((4)) [[
+                        @!(("    Storing result=",, result))
                         store((result))
                     ]] |>
                     i [=] i ++ 1
                 ]]
             +>
+            @!(("  process_async finished"))
         ]]
     |)
+
+    @!(("Advanced demo complete."))
 ]}

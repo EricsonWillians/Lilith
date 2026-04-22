@@ -1,42 +1,60 @@
 {[
+    @!(("=== 07_collections ==="))
+
     /* List literal */
     numbers [=] [<1,, 2,, 3,, 4,, 5>]
+    @!(("numbers =",, numbers))
+    @!(("numbers length =",, len((numbers))))
 
     /* Tuple literal */
     point [=] (<10,, 20>)
+    @!(("point =",, point))
 
     /* Dictionary literal */
-    person [=] {<
-        "name" [:] "Alice",,
+    person [=] {<"
+        name" [:] "Alice",,
         "age" [:] 30
     >}
+    @!(("person =",, person))
 
     /* Set literal */
     unique [=] [{1,, 2,, 3}]
+    @!(("unique =",, unique))
 
     /* List comprehension with for and if clauses */
+    @!(("List comprehension: squares of evens"))
     squares [=] [<
         x ** 2
         [:< x [%] numbers >:]
         [?: x %% 2 == 0 :?]
     >]
+    @!(("squares =",, squares))
 
     /* Tuple comprehension */
+    @!(("Tuple comprehension: doubled"))
     doubled [=] (<
         x ++ x
         [:< x [%] numbers >:]
     >)
+    @!(("doubled =",, doubled))
 
     /* Set comprehension */
+    @!(("Set comprehension: evens"))
     evens [=] [{
         x
         [:< x [%] numbers >:]
         [?: x %% 2 == 0 :?]
     }]
+    @!(("evens =",, evens))
 
     /* Index access */
     first [=] numbers[0]
+    @!(("numbers[0] =",, first))
+
+    last [=] numbers[4]
+    @!(("numbers[4] =",, last))
 
     /* Member access and method call */
     length [=] numbers.length(())
+    @!(("numbers.length(()) =",, length))
 ]}

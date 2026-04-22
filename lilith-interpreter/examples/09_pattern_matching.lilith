@@ -1,28 +1,32 @@
 {[
+    @!(("=== 09_pattern_matching ==="))
+
     value [=] 2
+    @!(("Matching value =",, value))
 
     /* Match statement with literal patterns */
     (-< value >-)
         [<0>] [[
-            @!(("Zero"))
+            @!(("  Pattern matched: Zero"))
         ]]
         [<1>] [[
-            @!(("One"))
+            @!(("  Pattern matched: One"))
         ]]
         [<2>] [[
-            @!(("Two"))
+            @!(("  Pattern matched: Two"))
         ]]
         [<x>] [[
-            @!(("Other"))
+            @!(("  Pattern matched: Other, bound to x=",, x))
         ]]
 
     /* Match with tuple pattern */
     pair [=] (<1,, 2>)
+    @!(("Matching pair =",, pair))
     (-< pair >-)
         [<(<0,, 0>)>] [[
-            @!(("Origin"))
+            @!(("  Pattern matched: Origin"))
         ]]
         [<(<a,, b>)>] [[
-            @!(("Point"))
+            @!(("  Pattern matched: Point, a=",, a,, "b=",, b))
         ]]
 ]}

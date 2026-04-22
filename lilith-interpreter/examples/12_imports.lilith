@@ -1,7 +1,15 @@
 {[
+    @!(("=== 12_imports ==="))
+
     /* Import a single module */
+    @!(("Importing single module..."))
     <{ io }>
+    @!(("Imported io"))
 
     /* Import multiple modules */
+    @!(("Importing multiple modules..."))
     <{ math,, string,, collections }>
+    @!(("Imported math, string, collections"))
+
+    @!(("Import demo complete."))
 ]}

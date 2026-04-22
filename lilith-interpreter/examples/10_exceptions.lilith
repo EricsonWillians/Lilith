@@ -1,31 +1,42 @@
 {[
+    @!(("=== 10_exceptions ==="))
+
     /* Basic try-except */
+    @!(("Trying risky_operation..."))
     {?
         [[
             result [=] risky_operation(())
+            @!(("  risky_operation succeeded:",, result))
         ]]
         [! err [/]
             [[
-                @!(("Caught error"))
+                @!(("  Caught error:",, err))
             ]]
         !]
     ?}
 
     /* Try-except-finally */
+    @!(("Trying file operation with finally..."))
     {?
         [[
             file [=] open(("data.txt"))
+            @!(("  File opened"))
             data [=] read((file))
+            @!(("  Data read:",, data))
         ]]
         [! error [/]
             [[
-                @!(("Read failed"))
+                @!(("  Read failed:",, error))
             ]]
         !]
         [:~
             [[
+                @!(("  Finally block executing"))
                 close((file))
+                @!(("  File closed"))
             ]]
         ~:]
     ?}
+
+    @!(("Exception handling demo complete."))
 ]}
