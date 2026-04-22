@@ -50,4 +50,14 @@
     flag [=] #false
     value [=] [?((flag == #true))[(100)] :|: [(0)] ?]
     @!(("Conditional flag=#false ->",, value))
+
+    /* Math standard library */
+    @!(("--- Math stdlib ---"))
+    @!(("math..pi =",, math..pi(())))
+    @!(("math..sqrt((16)) =",, math..sqrt((16))))
+    @!(("math..pow((2,, 10)) =",, math..pow((2,, 10))))
+    @!(("math..abs((:-:42)) =",, math..abs((:-:42))))
+    @!(("math..floor((3)) =",, math..floor((3))))
+    @!(("math..ceil((3)) =",, math..ceil((3))))
+    @!(("math..random((1,, 6)) =",, math..random((1,, 6))))
 ]}

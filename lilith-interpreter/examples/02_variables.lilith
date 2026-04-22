@@ -44,4 +44,13 @@
     @!(("  x =",, x))
     @!(("  y =",, y))
     @!(("  z =",, z))
+
+    /* String stdlib */
+    @!(("--- String stdlib ---"))
+    raw [=] "  hello world  "
+    @!(("trim =",, str..trim((raw))))
+    @!(("contains world =",, str..contains((raw,, "world"))))
+    @!(("starts_with spaces =",, str..starts_with((raw,, "  "))))
+    @!(("replace spaces with - =",, str..replace((raw,, " ",, "-"))))
+    @!(("substring(3..8) =",, str..substring((raw,, 3,, 8))))
 ]}

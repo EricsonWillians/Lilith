@@ -6,17 +6,20 @@
         [[
             @!(("  fetch_data() starting for url=",, url))
             response [=] ~(http..get((url)))~
-            @!(("  fetch_data() received response"))
+            @!(("  fetch_data() received response length =",, len((response))))
             )- response -(
         ]]
     |)
 
     /* Await expression */
     @!(("Awaiting fetch_data..."))
-    data [=] ~(fetch_data(("http://example.com")))~
-    @!(("Await result length =",, len((data))))
-    @!(("First 120 chars:"))
-    @!((data))
+    data [=] ~(fetch_data(("http://httpbin.org/get")))~
+    @!(("Response first 80 chars:"))
+    @!((str..substring((data,, 0,, 80))))
+
+    /* Parse JSON response */
+    parsed [=] json..decode((data))
+    @!(("Parsed JSON =",, parsed))
 
     /* Generator-style async function with yield */
     (| ~ counter (())

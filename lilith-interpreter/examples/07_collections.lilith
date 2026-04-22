@@ -57,4 +57,28 @@
     /* Member access and method call */
     length [=] numbers.length(())
     @!(("numbers.length(()) =",, length))
+
+    /* List stdlib operations */
+    @!(("--- List stdlib ---"))
+    list..push((numbers,, 6))
+    @!(("after push 6 =",, numbers))
+    @!(("find 4 at index =",, list..find((numbers,, 4))))
+    list..sort((numbers))
+    @!(("sorted =",, numbers))
+    @!(("popped =",, list..pop((numbers))))
+    @!(("after pop =",, numbers))
+
+    /* String stdlib on collection */
+    csv [=] "apple,banana,cherry"
+    fruits [=] str..split((csv,, ","))
+    @!(("split csv =",, fruits))
+    @!(("joined =",, str..join((" | ",, fruits))))
+
+    /* JSON round-trip */
+    @!(("--- JSON ---"))
+    data [=] {< "x" [:] 10,, "y" [:] 20 >}
+    json_str [=] json..encode((data))
+    @!(("encoded =",, json_str))
+    parsed [=] json..decode((json_str))
+    @!(("decoded =",, parsed))
 ]}
