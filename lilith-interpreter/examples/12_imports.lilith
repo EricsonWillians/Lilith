@@ -1,0 +1,7 @@
+{[
+    /* Import a single module */
+    <{ io }>
+
+    /* Import multiple modules */
+    <{ math,, string,, collections }>
+]}

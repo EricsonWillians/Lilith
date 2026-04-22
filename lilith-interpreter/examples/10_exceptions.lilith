@@ -1,0 +1,31 @@
+{[
+    /* Basic try-except */
+    {?
+        [[
+            result [=] risky_operation(())
+        ]]
+        [! err [/]
+            [[
+                @!(("Caught error"))
+            ]]
+        !]
+    ?}
+
+    /* Try-except-finally */
+    {?
+        [[
+            file [=] open(("data.txt"))
+            data [=] read((file))
+        ]]
+        [! error [/]
+            [[
+                @!(("Read failed"))
+            ]]
+        !]
+        [:~
+            [[
+                close((file))
+            ]]
+        ~:]
+    ?}
+]}

@@ -1,0 +1,27 @@
+{[
+    /* Arithmetic operators */
+    a [=] 5 ++ 3
+    b [=] 10 -- 2
+    c [=] 4 ** 3
+    d [=] 20 // 4
+    e [=] 17 %% 5
+
+    /* Unary negation */
+    neg [=] :-:10
+
+    /* Comparison operators */
+    eq [=] 5 == 5
+    ne [=] 5 != 3
+    lt [=] 3 << 5
+    gt [=] 10 >> 2
+
+    /* Grouping with ((...)) */
+    grouped [=] ((2 ++ 3)) ** 4
+
+    /* Conditional expression */
+    result [=] [?((5 >> 3))[(10)] :|: [(20)] ?]
+
+    /* Nested conditional expression */
+    flag [=] #true
+    value [=] [?((flag == #true))[(100)] :|: [(0)] ?]
+]}

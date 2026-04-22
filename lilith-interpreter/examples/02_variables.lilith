@@ -1,0 +1,24 @@
+{[
+    /* Integer literals */
+    count [=] 42
+    zero [=] 0
+    large [=] 999999
+
+    /* String literals */
+    greeting [=] "Hello"
+    target [=] "Lilith"
+    empty_string [=] ""
+
+    /* Boolean literals */
+    active [=] #true
+    inactive [=] #false
+
+    /* Nil literal */
+    nothing [=] nil
+
+    /* Reassignment */
+    count [=] 100
+
+    /* Parallel assignment via tuple destructuring */
+    (<x,, y,, z>) [=] (<1,, 2,, 3>)
+]}

@@ -1,0 +1,28 @@
+{[
+    value [=] 2
+
+    /* Match statement with literal patterns */
+    (-< value >-)
+        [<0>] [[
+            @!(("Zero"))
+        ]]
+        [<1>] [[
+            @!(("One"))
+        ]]
+        [<2>] [[
+            @!(("Two"))
+        ]]
+        [<x>] [[
+            @!(("Other"))
+        ]]
+
+    /* Match with tuple pattern */
+    pair [=] (<1,, 2>)
+    (-< pair >-)
+        [<(<0,, 0>)>] [[
+            @!(("Origin"))
+        ]]
+        [<(<a,, b>)>] [[
+            @!(("Point"))
+        ]]
+]}

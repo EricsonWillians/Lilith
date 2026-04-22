@@ -1,0 +1,41 @@
+{[
+    /* Base class definition */
+    {| Animal
+        [[
+            (| init ((self,, name))
+                [[
+                    self.name [=] name
+                ]]
+            |)
+
+            (| speak ((self))
+                [[
+                    )- "..." -(
+                ]]
+            |)
+        ]]
+    |}
+
+    /* Derived class with inheritance */
+    {| Dog ([: Animal :])
+        [[
+            (| speak ((self))
+                [[
+                    )- "Woof!" -(
+                ]]
+            |)
+
+            (| fetch ((self,, item))
+                [[
+                    @!(("Fetching"))
+                    )- item -(
+                ]]
+            |)
+        ]]
+    |}
+
+    /* Member access on objects */
+    dog [=] Dog(())
+    name [=] dog.name(())
+    sound [=] dog.speak(())
+]}

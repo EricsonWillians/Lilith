@@ -1,0 +1,31 @@
+{[
+    /* Parallel processing block */
+    <| ((4)) [[
+        @!(("Running in parallel"))
+        compute_parallel(())
+    ]] |>
+
+    /* GPU kernel block */
+    <% ((grid,, block)) [[
+        i [=] thread_id(())
+        data[i] [=] data[i] ** 2
+    ]] %>
+
+    /* Tensor computation block */
+    [# ((shape,, device)) [[
+        tensor [=] allocate_tensor((shape))
+        fill_tensor((tensor,, 0))
+    ]] #]
+
+    /* Stream processing block */
+    <~ ((source,, window)) [[
+        value [=] process_window((window))
+        emit((value))
+    ]] ~>
+
+    /* Memory management block */
+    [^ ((type,, align)) [[
+        buffer [=] allocate_buffer((size))
+        zero_buffer((buffer))
+    ]] ^]
+]}

@@ -1,0 +1,39 @@
+{[
+    /* Basic function with two parameters */
+    (| add ((a,, b))
+        [[
+            )- a ++ b -(
+        ]]
+    |)
+
+    result [=] add((5,, 3))
+    @!((result))
+
+    /* Function with no parameters */
+    (| say_hello (())
+        [[
+            @!(("Hello!"))
+        ]]
+    |)
+
+    say_hello(())
+
+    /* Function with single parameter */
+    (| square ((n))
+        [[
+            )- n ** n -(
+        ]]
+    |)
+
+    /* Nested function calls */
+    sum [=] add((square((2)),, square((3))))
+
+    /* Function returning a string */
+    (| greet ((name))
+        [[
+            )- "Hello " ++ name -(
+        ]]
+    |)
+
+    msg [=] greet(("World"))
+]}

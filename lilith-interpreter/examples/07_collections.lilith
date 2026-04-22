@@ -1,0 +1,42 @@
+{[
+    /* List literal */
+    numbers [=] [<1,, 2,, 3,, 4,, 5>]
+
+    /* Tuple literal */
+    point [=] (<10,, 20>)
+
+    /* Dictionary literal */
+    person [=] {<
+        "name" [:] "Alice",,
+        "age" [:] 30
+    >}
+
+    /* Set literal */
+    unique [=] [{1,, 2,, 3}]
+
+    /* List comprehension with for and if clauses */
+    squares [=] [<
+        x ** 2
+        [:< x [%] numbers >:]
+        [?: x %% 2 == 0 :?]
+    >]
+
+    /* Tuple comprehension */
+    doubled [=] (<
+        x ++ x
+        [:< x [%] numbers >:]
+    >)
+
+    /* Set comprehension */
+    evens [=] [{
+        x
+        [:< x [%] numbers >:]
+        [?: x %% 2 == 0 :?]
+    }]
+
+    /* Index access */
+    first [=] numbers[0]
+
+    /* Member access and method call */
+    length [=] numbers.length(())
+]}

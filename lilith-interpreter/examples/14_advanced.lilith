@@ -1,0 +1,68 @@
+{[
+    /* Nested function definitions */
+    (| outer ((x))
+        [[
+            (| inner ((y))
+                [[
+                    )- x ++ y -(
+                ]]
+            |)
+
+            )- inner((10)) -(
+        ]]
+    |)
+
+    /* Conditional expression in assignment */
+    flag [=] #true
+    value [=] [?((flag == #true))[(100)] :|: [(0)] ?]
+
+    /* Complex collection operations with comprehensions */
+    data [=] [<1,, 2,, 3,, 4,, 5>]
+    mapped [=] [< x ** 2 [:< x [%] data >:] >]
+    filtered [=] [< x [:< x [%] data >:] [?: x %% 2 == 1 :?] >]
+
+    /* Class with methods using member access */
+    {| Counter
+        [[
+            (| init ((self))
+                [[
+                    self.count [=] 0
+                ]]
+            |)
+
+            (| increment ((self))
+                [[
+                    self.count [=] self.count ++ 1
+                    )- self.count -(
+                ]]
+            |)
+        ]]
+    |}
+
+    /* HPC block nested inside a loop */
+    i [=] 0
+    <+((i << 3))
+        [[
+            <| ((4)) [[
+                compute((i))
+            ]] |>
+            i [=] i ++ 1
+        ]]
+    +>
+
+    /* Async function with await and HPC */
+    (| ~ process_async ((items))
+        [[
+            <+((i << items.length(())))
+                [[
+                    item [=] items[i]
+                    result [=] ~(compute_async((item)))~
+                    <| ((4)) [[
+                        store((result))
+                    ]] |>
+                    i [=] i ++ 1
+                ]]
+            +>
+        ]]
+    |)
+]}

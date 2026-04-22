@@ -1,0 +1,14 @@
+{[
+    /* Simple lambda with one parameter */
+    inc [=] (:< ((x)) [[ x ++ 1 ]] >:)
+
+    /* Lambda with multiple parameters */
+    mul [=] (:< ((a,, b)) [[ a ** b ]] >:)
+
+    /* Lambda called immediately */
+    result [=] (:< ((n)) [[ n ** 2 ]] >:)((5))
+
+    /* Lambda assigned and called later */
+    double [=] (:< ((x)) [[ x ++ x ]] >:)
+    val [=] double((7))
+]}

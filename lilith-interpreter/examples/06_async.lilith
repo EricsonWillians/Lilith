@@ -1,0 +1,25 @@
+{[
+    /* Async function definition */
+    (| ~ fetch_data ((url))
+        [[
+            response [=] ~(http_get((url)))~
+            )- response -(
+        ]]
+    |)
+
+    /* Await expression */
+    data [=] ~(fetch_data(("api.example.com")))~
+
+    /* Generator-style async function with yield */
+    (| ~ counter (())
+        [[
+            i [=] 0
+            <+((i << 3))
+                [[
+                    )-? i ?-(
+                    i [=] i ++ 1
+                ]]
+            +>
+        ]]
+    |)
+]}
