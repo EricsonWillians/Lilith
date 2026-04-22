@@ -354,9 +354,17 @@ static Token read_string(Lexer *l, size_t start_pos, size_t start_line, size_t s
 }
 
 /* Read an identifier: consume allowed chars until we hit a reserved
-   token prefix or a non-allowed char.                    */
+   token prefix or a non-allowed char.  The '..' sequence is allowed
+   inside identifiers as a namespace separator.              */
 static Token read_identifier(Lexer *l, size_t start_pos, size_t start_line, size_t start_column) {
-    while (!is_at_end(l) && is_allowed_sym(current_char(l))) {
+    while (!is_at_end(l)) {
+        /* Allow '..' namespace separator inside identifiers */
+        if (current_char(l) == '.' && peek_char(l, 1) == '.') {
+            advance(l);
+            advance(l);
+            continue;
+        }
+        if (!is_allowed_sym(current_char(l))) break;
         int reserved = 0;
         for (size_t i = 0; i < tokenMappingsCount; i++) {
             if (match_string(l, tokenMappings[i].str)) {

@@ -160,10 +160,10 @@ void interpreter_init(Interpreter *interp) {
     define_native(interp, "str", native_str);
     define_native(interp, "num", native_num);
 
-    define_native(interp, "http_get", native_http_get);
-    define_native(interp, "file_read", native_file_read);
-    define_native(interp, "file_write", native_file_write);
-    define_native(interp, "exit", native_exit);
+    define_native(interp, "http..get", native_http_get);
+    define_native(interp, "io..read", native_file_read);
+    define_native(interp, "io..write", native_file_write);
+    define_native(interp, "sys..exit", native_exit);
 }
 
 void interpreter_free(Interpreter *interp) {

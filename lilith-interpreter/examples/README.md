@@ -110,7 +110,7 @@ Most examples produce extensive runtime output so you can observe the interprete
 
 ## Notes & Limitations
 
-* **Runtime execution** — The interpreter now evaluates expressions, calls functions, and produces output. Native functions such as `@!` / `print`, `input`, `clock`, `type`, `len`, `str`, `num`, `http_get`, `file_read`, `file_write`, and `exit` are available.
+* **Runtime execution** — The interpreter now evaluates expressions, calls functions, and produces output. Native functions such as `@!` / `print`, `input`, `clock`, `type`, `len`, `str`, `num`, `http..get`, `io..read`, `io..write`, and `sys..exit` are available.
 * **Numbers** — Only integer literals are supported at this time. Floating-point and negative literal syntax (`-5`) are not yet lexed; use `:-:` for unary negation.
 * **String escapes** — Escape sequences inside strings are not processed; write literal characters only.
 * **Empty collections** — Empty list/tuple/dict/set literals may not parse correctly; include at least one element.

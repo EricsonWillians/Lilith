@@ -5,7 +5,7 @@
     (| ~ fetch_data ((url))
         [[
             @!(("  fetch_data() starting for url=",, url))
-            response [=] ~(http_get((url)))~
+            response [=] ~(http..get((url)))~
             @!(("  fetch_data() received response"))
             )- response -(
         ]]
