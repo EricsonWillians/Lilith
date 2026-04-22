@@ -2,6 +2,11 @@
 #include "interpreter.h"
 #include "gc.h"
 #include "stdlib/io.h"
+#include "stdlib/math.h"
+#include "stdlib/string.h"
+#include "stdlib/list.h"
+#include "stdlib/json.h"
+#include "stdlib/os.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -164,6 +169,46 @@ void interpreter_init(Interpreter *interp) {
     define_native(interp, "io..read", native_file_read);
     define_native(interp, "io..write", native_file_write);
     define_native(interp, "sys..exit", native_exit);
+
+    /* Math */
+    define_native(interp, "math..abs", native_math_abs);
+    define_native(interp, "math..floor", native_math_floor);
+    define_native(interp, "math..ceil", native_math_ceil);
+    define_native(interp, "math..sqrt", native_math_sqrt);
+    define_native(interp, "math..pow", native_math_pow);
+    define_native(interp, "math..sin", native_math_sin);
+    define_native(interp, "math..cos", native_math_cos);
+    define_native(interp, "math..tan", native_math_tan);
+    define_native(interp, "math..pi", native_math_pi);
+    define_native(interp, "math..e", native_math_e);
+    define_native(interp, "math..random", native_math_random);
+
+    /* String */
+    define_native(interp, "str..len", native_str_len);
+    define_native(interp, "str..trim", native_str_trim);
+    define_native(interp, "str..contains", native_str_contains);
+    define_native(interp, "str..starts_with", native_str_starts_with);
+    define_native(interp, "str..ends_with", native_str_ends_with);
+    define_native(interp, "str..replace", native_str_replace);
+    define_native(interp, "str..substring", native_str_substring);
+    define_native(interp, "str..split", native_str_split);
+    define_native(interp, "str..join", native_str_join);
+
+    /* List */
+    define_native(interp, "list..push", native_list_push);
+    define_native(interp, "list..pop", native_list_pop);
+    define_native(interp, "list..find", native_list_find);
+    define_native(interp, "list..sort", native_list_sort);
+
+    /* JSON */
+    define_native(interp, "json..encode", native_json_encode);
+    define_native(interp, "json..decode", native_json_decode);
+
+    /* OS */
+    define_native(interp, "env..get", native_env_get);
+    define_native(interp, "env..set", native_env_set);
+    define_native(interp, "os..time", native_os_time);
+    define_native(interp, "os..sleep", native_os_sleep);
 }
 
 void interpreter_free(Interpreter *interp) {

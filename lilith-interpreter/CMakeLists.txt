@@ -24,6 +24,7 @@ file(GLOB_RECURSE LILITH_SOURCES
 # Create the main executable for the interpreter.
 add_executable(lilith ${LILITH_SOURCES})
 target_include_directories(lilith PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(lilith PRIVATE m)
 
 # Optionally, install the interpreter to the bin folder.
 install(TARGETS lilith DESTINATION bin)

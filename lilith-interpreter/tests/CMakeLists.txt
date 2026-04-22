@@ -9,9 +9,11 @@ list(REMOVE_ITEM SRC_SOURCES "${CMAKE_SOURCE_DIR}/src/main.c")
 # Build lexer tests separately.
 add_executable(test_lexer test_lexer.c ${SRC_SOURCES})
 target_include_directories(test_lexer PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(test_lexer PRIVATE m)
 add_test(NAME LexerTests COMMAND test_lexer)
 
 # Build parser tests separately.
 add_executable(test_parser test_parser.c ${SRC_SOURCES})
 target_include_directories(test_parser PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(test_parser PRIVATE m)
 add_test(NAME ParserTests COMMAND test_parser)
