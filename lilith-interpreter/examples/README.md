@@ -67,11 +67,11 @@ Most examples produce extensive runtime output so you can observe the interprete
 | `07_collections.lilith` | List `[<…>]`, tuple `(<…>)`, dict `{<…>}`, set `[{…}]`, comprehensions, index `a[i]`, member `obj.prop`, list/string/json stdlib | Working |
 | `08_classes.lilith` | Class definition `{| … |}`, inheritance `([: … :])`, methods, `self` | Working |
 | `09_pattern_matching.lilith` | `match` statement `(-< … >-)`, literal and tuple patterns | Working |
-| `10_exceptions.lilith` | `try` / `except` / `finally` blocks | Working; catches expected errors from `risky_operation`, `open`, `close` |
-| `11_hpc.lilith` | Parallel `<|…|>`, GPU `<%…%>`, tensor `[#…#]`, stream `<~…~>`, memory `[^…^]` | Parses; fails at runtime on undefined HPC natives |
+| `10_exceptions.lilith` | `try` / `except` / `finally` blocks | Working; HPC natives reserved for future runtime |
+| `11_hpc.lilith` | Parallel `<|…|>`, GPU `<%…%>`, tensor `[#…#]`, stream `<~…~>`, memory `[^…^]` | Syntactically supported; runtime natives reserved for future implementation |
 | `12_imports.lilith` | Module imports `<{ … }>` | Working (parsed as no-op) |
 | `13_lambdas.lilith` | Lambda expressions `(:< … >:)` | Working; lambdas currently return `nil` (no implicit return) |
-| `14_advanced.lilith` | Nested functions, nested HPC inside loops, async + HPC combined, complex comprehensions | Partial; fails at runtime on undefined HPC natives |
+| `14_advanced.lilith` | Nested functions, nested HPC inside loops, async + HPC combined, complex comprehensions | Partial; HPC natives reserved for future runtime |
 
 ---
 
@@ -90,13 +90,24 @@ A tiny set of sacred core forms remain global for ergonomics. Everything else li
 | `@!` / `print` | Print arguments separated by spaces, with newline. |
 | `input(prompt?)` | Read a line from stdin. |
 
-### I/O & HTTP
+### HTTP
 
 | Function | Description |
 |----------|-------------|
 | `http..get(url)` | Blocking HTTP/1.0 GET. Returns response body string or `nil`. |
+
+### I/O
+
+| Function | Description |
+|----------|-------------|
 | `io..read(path)` | Reads entire file into a string. |
 | `io..write(path, contents)` | Writes string to file. Returns `true`/`false`. |
+
+### System
+
+| Function | Description |
+|----------|-------------|
+| `sys..exit(code)` | Terminate process. |
 
 ### Math
 
@@ -145,15 +156,19 @@ A tiny set of sacred core forms remain global for ergonomics. Everything else li
 | `json..encode(value)` | Encode value (nil, bool, number, string, list, dict) to JSON string. |
 | `json..decode(string)` | Parse JSON string into Lilith values. |
 
-### OS & Environment
+### Environment
 
 | Function | Description |
 |----------|-------------|
 | `env..get(name)` | Get environment variable or `nil`. |
 | `env..set(name, value)` | Set environment variable. Returns `true`/`false`. |
+
+### OS
+
+| Function | Description |
+|----------|-------------|
 | `os..time()` | Unix timestamp. |
 | `os..sleep(seconds)` | Sleep for N seconds. |
-| `sys..exit(code)` | Terminate process. |
 
 ### Meta
 
@@ -232,6 +247,6 @@ The following globals are aliases to their namespaced counterparts for ergonomic
 * **String escapes** — Escape sequences inside strings are not processed; write literal characters only.
 * **Empty collections** — Empty list/tuple/dict/set literals may not parse correctly; include at least one element.
 * **Macros, type annotations, and compile-time features** from the full grammar specification are reserved for future implementation and are not exercised here.
-* **HPC blocks** — Parallel, GPU, tensor, stream, and memory blocks are parsed and their bodies are executed, but the surrounding HPC directives are currently no-ops.
+* **HPC blocks** — Parallel, GPU, tensor, stream, and memory blocks are parsed and their bodies are executed, but the surrounding HPC directives are currently no-ops. The associated native runtime functions are reserved for future implementation.
 * **Lambda returns** — Lambda bodies do not yet implicitly return their last expression; explicit `)- expr -(` is required inside the body to return a value.
 * **HTTPS** — `http..get` supports plain HTTP only; HTTPS requires TLS which is not yet implemented.
