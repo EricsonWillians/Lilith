@@ -100,9 +100,12 @@ typedef struct {
     struct Environment *closure;
 } ObjFunction;
 
+struct ObjClass;
+
 typedef struct {
     Obj obj;
     char *name;
+    struct ObjClass *superclass;
     ObjDict *methods;
 } ObjClass;
 

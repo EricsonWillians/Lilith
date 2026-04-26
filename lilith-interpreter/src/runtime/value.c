@@ -109,6 +109,7 @@ ObjFunction *obj_function_new(const char *name) {
 ObjClass *obj_class_new(const char *name) {
     ObjClass *klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
     klass->name = name ? strdup(name) : NULL;
+    klass->superclass = NULL;
     klass->methods = obj_dict_new();
     return klass;
 }

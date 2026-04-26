@@ -787,8 +787,15 @@ static AstNode *parse_class_statement(Parser *p) {
     size_t col = p->previous.column;
     Token name = consume(p, LILITH_TOKEN_IDENTIFIER, "Expected class name after '{|'.");
     /* Parse inheritance list if present */
+    char *superclass = NULL;
     if (match(p, LILITH_TOKEN_INHERITANCE_START)) {
-        while (!check(p, LILITH_TOKEN_INHERITANCE_END) && !check(p, LILITH_TOKEN_EOF)) advance(p);
+        if (check(p, LILITH_TOKEN_IDENTIFIER)) {
+            Token super = p->current;
+            advance(p);
+            superclass = token_to_string(super);
+        } else {
+            while (!check(p, LILITH_TOKEN_INHERITANCE_END) && !check(p, LILITH_TOKEN_EOF)) advance(p);
+        }
         consume(p, LILITH_TOKEN_INHERITANCE_END, "Expected ':])' after inheritance list.");
     }
     AstNode *body = parse_block(p);
@@ -800,8 +807,9 @@ static AstNode *parse_class_statement(Parser *p) {
     body->as.block.stmts = NULL;
     body->as.block.count = 0;
     ast_free(body);
-    AstNode *node = ast_class(name_str, methods, method_count, line, col);
+    AstNode *node = ast_class(name_str, superclass, methods, method_count, line, col);
     free(name_str);
+    free(superclass);
     return node;
 }
 

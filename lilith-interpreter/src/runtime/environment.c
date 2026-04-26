@@ -61,3 +61,27 @@ int env_set(Environment *env, const char *name, Value value) {
     if (env->enclosing) return env_set(env->enclosing, name, value);
     return 0;
 }
+
+int env_get_at(Environment *env, const char *name, Value *out, int depth) {
+    Environment *current = env;
+    for (int i = 0; i < depth && current; i++) {
+        current = current->enclosing;
+    }
+    if (!current) return 0;
+    return env_get(current, name, out);
+}
+
+int env_set_at(Environment *env, const char *name, Value value, int depth) {
+    Environment *current = env;
+    for (int i = 0; i < depth && current; i++) {
+        current = current->enclosing;
+    }
+    if (!current) return 0;
+    ObjString key;
+    key.obj.type = OBJ_STRING;
+    key.chars = (char *)name;
+    key.length = strlen(name);
+    key.hash = hash_string(name, key.length);
+    dict_set(current->values, &key, value);
+    return 1;
+}

@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 void gc_track(void *obj);
+void gc_collect(void);
 
 #ifdef __cplusplus
 }

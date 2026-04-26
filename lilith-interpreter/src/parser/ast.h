@@ -88,7 +88,7 @@ struct AstNode {
         struct { AstNode *value; } return_stmt;
         struct { AstNode *value; } yield_stmt;
         struct { char *name; char **params; char **param_types; size_t param_count; AstNode *body; char *return_type; int is_async; } function;
-        struct { char *name; AstNode **methods; size_t method_count; } class_def;
+        struct { char *name; char *superclass; AstNode **methods; size_t method_count; } class_def;
         struct { AstNode *try_body; char *catch_var; AstNode *catch_body; AstNode *finally_body; } try_stmt;
         struct { AstNode *expr; AstNode **cases; size_t case_count; } match_stmt;
         struct { char **names; size_t count; } import;
@@ -133,7 +133,7 @@ AstNode *ast_yield(AstNode *value, size_t line, size_t column);
 AstNode *ast_break(size_t line, size_t column);
 AstNode *ast_continue(size_t line, size_t column);
 AstNode *ast_function(const char *name, char **params, char **param_types, size_t param_count, AstNode *body, char *return_type, int is_async, size_t line, size_t column);
-AstNode *ast_class(const char *name, AstNode **methods, size_t method_count, size_t line, size_t column);
+AstNode *ast_class(const char *name, const char *superclass, AstNode **methods, size_t method_count, size_t line, size_t column);
 AstNode *ast_try(AstNode *try_body, const char *catch_var, AstNode *catch_body, AstNode *finally_body, size_t line, size_t column);
 AstNode *ast_match(AstNode *expr, AstNode **cases, size_t case_count, size_t line, size_t column);
 AstNode *ast_import(char **names, size_t count, size_t line, size_t column);

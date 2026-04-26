@@ -99,9 +99,10 @@ AstNode *ast_function(const char *name, char **params, char **param_types, size_
     return n;
 }
 
-AstNode *ast_class(const char *name, AstNode **methods, size_t method_count, size_t line, size_t column) {
+AstNode *ast_class(const char *name, const char *superclass, AstNode **methods, size_t method_count, size_t line, size_t column) {
     AstNode *n = ast_create(AST_CLASS, line, column);
     n->as.class_def.name = name ? strdup(name) : NULL;
+    n->as.class_def.superclass = superclass ? strdup(superclass) : NULL;
     if (method_count > 0) {
         n->as.class_def.methods = (AstNode **)malloc(sizeof(AstNode *) * method_count);
         memcpy(n->as.class_def.methods, methods, sizeof(AstNode *) * method_count);
@@ -351,6 +352,7 @@ void ast_free(AstNode *node) {
             break;
         case AST_CLASS:
             free(node->as.class_def.name);
+            free(node->as.class_def.superclass);
             for (size_t i = 0; i < node->as.class_def.method_count; i++) ast_free(node->as.class_def.methods[i]);
             free(node->as.class_def.methods);
             break;

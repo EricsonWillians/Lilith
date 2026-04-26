@@ -60,6 +60,16 @@ static int check_type(Value value, const char *type_name) {
     return strcmp(value_type_name(value), type_name) == 0;
 }
 
+/* Look up a method in a class and its superclass chain */
+static int class_lookup_method(ObjClass *klass, ObjString *name, Value *out) {
+    ObjClass *current = klass;
+    while (current) {
+        if (dict_get(current->methods, name, out)) return 1;
+        current = current->superclass;
+    }
+    return 0;
+}
+
 static Value value_str_concat(Value a, Value b) {
     const char *as = value_to_string(a);
     const char *bs = value_to_string(b);
@@ -327,12 +337,12 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                     if (dict_get(inst->fields, obj_string_copy(method_name, strlen(method_name)), &val)) {
                         if (IS_FUNCTION(val)) method = AS_FUNCTION(val);
                     }
-                    if (!method && dict_get(inst->klass->methods, obj_string_copy(method_name, strlen(method_name)), &val)) {
+                    if (!method && class_lookup_method(inst->klass, obj_string_copy(method_name, strlen(method_name)), &val)) {
                         if (IS_FUNCTION(val)) method = AS_FUNCTION(val);
                     }
                 } else if (IS_CLASS(obj)) {
                     Value val;
-                    if (dict_get(AS_CLASS(obj)->methods, obj_string_copy(method_name, strlen(method_name)), &val)) {
+                    if (class_lookup_method(AS_CLASS(obj), obj_string_copy(method_name, strlen(method_name)), &val)) {
                         if (IS_FUNCTION(val)) method = AS_FUNCTION(val);
                     }
                 } else if (IS_LIST(obj) || IS_DICT(obj) || IS_STRING(obj) || IS_TUPLE(obj)) {
@@ -394,8 +404,8 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                 /* Type-check arguments before binding */
                 for (size_t i = 0; i < fn->param_count && i < arg_count; i++) {
                     if (fn->param_types && fn->param_types[i] && !check_type(args[i], fn->param_types[i])) {
-                        runtime_error(interp, "Expected argument %zu to be %s, got %s",
-                                      i + 1, fn->param_types[i], value_type_name(args[i]));
+                        fprintf(stderr, "Type error: Expected argument %zu to be %s, got %s\n",
+                                i + 1, fn->param_types[i], value_type_name(args[i]));
                         free(args);
                         return NIL_VAL;
                     }
@@ -431,7 +441,7 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                 ObjInstance *inst = obj_instance_new(klass);
                 /* Call init if present */
                 Value init_val;
-                if (dict_get(klass->methods, obj_string_copy("init", 4), &init_val) && IS_FUNCTION(init_val)) {
+                if (class_lookup_method(klass, obj_string_copy("init", 4), &init_val) && IS_FUNCTION(init_val)) {
                     ObjFunction *init = AS_FUNCTION(init_val);
                     Environment *call_env = env_new_enclosing(interp->globals);
                     env_define(call_env, "self", OBJ_VAL(inst));
@@ -466,7 +476,7 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                 ObjInstance *inst = AS_INSTANCE(obj);
                 Value val;
                 if (dict_get(inst->fields, obj_string_copy(name, strlen(name)), &val)) return val;
-                if (dict_get(inst->klass->methods, obj_string_copy(name, strlen(name)), &val)) return val;
+                if (class_lookup_method(inst->klass, obj_string_copy(name, strlen(name)), &val)) return val;
                 runtime_error_node(interp, node, "Undefined property '%s'.", name);
                 return NIL_VAL;
             }
@@ -637,7 +647,13 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
             Value last = NIL_VAL;
             for (size_t i = 0; i < node->as.block.count; i++) {
                 last = eval_stmt(interp, node->as.block.stmts[i]);
-                if (interp->return_flag || interp->break_flag || interp->continue_flag || interp->throw_flag)
+                if (interp->return_flag) {
+                    /* Propagate return value from __return__ */
+                    Value ret;
+                    if (env_get(interp->env, "__return__", &ret)) return ret;
+                    return NIL_VAL;
+                }
+                if (interp->break_flag || interp->continue_flag || interp->throw_flag)
                     return NIL_VAL;
             }
             return last;
@@ -770,26 +786,27 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
         }
 
         case AST_RETURN: {
-            interp->return_flag = 1;
-            /* Store return value in the current environment so caller can retrieve it */
+            /* Evaluate expression first, then set return flag.
+               This prevents nested function calls from clearing our return_flag. */
             Value val = eval_expr(interp, node->as.return_stmt.value);
             if (interp->throw_flag) return NIL_VAL;
             /* Check return type if annotated */
             if (interp->current_function && interp->current_function->return_type &&
                 !check_type(val, interp->current_function->return_type)) {
-                runtime_error(interp, "Expected return type %s, got %s",
-                              interp->current_function->return_type, value_type_name(val));
+                fprintf(stderr, "Type error: Expected return type %s, got %s\n",
+                        interp->current_function->return_type, value_type_name(val));
                 return NIL_VAL;
             }
             env_define(interp->env, "__return__", val);
+            interp->return_flag = 1;
             return val;
         }
 
         case AST_YIELD: {
-            interp->return_flag = 1;
             Value val = eval_expr(interp, node->as.yield_stmt.value);
             if (interp->throw_flag) return NIL_VAL;
             env_define(interp->env, "__return__", val);
+            interp->return_flag = 1;
             return val;
         }
 
@@ -821,6 +838,19 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
 
         case AST_CLASS: {
             ObjClass *klass = obj_class_new(node->as.class_def.name);
+            /* Resolve superclass if specified */
+            if (node->as.class_def.superclass) {
+                Value super_val;
+                if (!env_get(interp->env, node->as.class_def.superclass, &super_val)) {
+                    runtime_error(interp, "Undefined superclass '%s'.", node->as.class_def.superclass);
+                    return NIL_VAL;
+                }
+                if (!IS_CLASS(super_val)) {
+                    runtime_error(interp, "Superclass must be a class.");
+                    return NIL_VAL;
+                }
+                klass->superclass = AS_CLASS(super_val);
+            }
             for (size_t i = 0; i < node->as.class_def.method_count; i++) {
                 AstNode *method = node->as.class_def.methods[i];
                 if (method->type == AST_FUNCTION) {
