@@ -1,6 +1,19 @@
 {[
     @!(("=== 11_hpc ==="))
 
+    /* HPC context variables — in a real runtime these would be
+       provided by the parallel/GPU/tensor subsystem.  */
+    data [=] [<1,, 2,, 3,, 4,, 5>]
+    grid [=] 16
+    block [=] 4
+    shape [=] [<2,, 3>]
+    device [=] "gpu0"
+    source [=] "stream_source"
+    window [=] 64
+    type [=] "float32"
+    align [=] 64
+    size [=] 1024
+
     /* Parallel processing block */
     @!(("Entering parallel block"))
     <| ((4)) [[

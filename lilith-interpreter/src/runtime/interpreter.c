@@ -11,6 +11,7 @@
 #include "stdlib/seq.h"
 #include "stdlib/time.h"
 #include "stdlib/num.h"
+#include "stdlib/hpc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -195,6 +196,19 @@ void interpreter_init(Interpreter *interp) {
     define_native(interp, "str", native_str_from);
     define_native(interp, "num", native_num_from);
     define_native(interp, "clock", native_time_clock);
+
+    /* HPC stubs — vaporware placeholders for parallel/GPU/tensor runtime */
+    define_native(interp, "compute_parallel", native_compute_parallel);
+    define_native(interp, "compute", native_compute);
+    define_native(interp, "compute_async", native_compute_async);
+    define_native(interp, "store", native_store);
+    define_native(interp, "thread_id", native_thread_id);
+    define_native(interp, "allocate_tensor", native_allocate_tensor);
+    define_native(interp, "fill_tensor", native_fill_tensor);
+    define_native(interp, "process_window", native_process_window);
+    define_native(interp, "emit", native_emit);
+    define_native(interp, "allocate_buffer", native_allocate_buffer);
+    define_native(interp, "zero_buffer", native_zero_buffer);
 }
 
 void interpreter_free(Interpreter *interp) {
