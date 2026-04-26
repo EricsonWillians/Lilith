@@ -81,6 +81,7 @@ static void synchronize(Parser *p) {
             case LILITH_TOKEN_CLASS_DEF_START:
             case LILITH_TOKEN_IF_START:
             case LILITH_TOKEN_WHILE_START:
+            case LILITH_TOKEN_FOR_START:
             case LILITH_TOKEN_RETURN_START:
             case LILITH_TOKEN_TRY_START:
             case LILITH_TOKEN_MATCH_START:
@@ -110,6 +111,29 @@ static AstNode *parse_equality(Parser *p);
 static AstNode *parse_and(Parser *p);
 static AstNode *parse_or(Parser *p);
 static AstNode *parse_conditional(Parser *p);
+
+/* Unescape a string literal: \n, \t, \", \\\n   Input is the raw content without surrounding quotes. */
+static char *unescape_string(const char *src) {
+    size_t len = strlen(src);
+    char *out = (char *)malloc(len + 1);
+    size_t j = 0;
+    for (size_t i = 0; i < len; i++) {
+        if (src[i] == '\\' && i + 1 < len) {
+            switch (src[i + 1]) {
+                case 'n': out[j++] = '\n'; i++; break;
+                case 't': out[j++] = '\t'; i++; break;
+                case 'r': out[j++] = '\r'; i++; break;
+                case '"': out[j++] = '"'; i++; break;
+                case '\\': out[j++] = '\\'; i++; break;
+                default: out[j++] = src[i]; break;
+            }
+        } else {
+            out[j++] = src[i];
+        }
+    }
+    out[j] = '\0';
+    return out;
+}
 
 /* ========================================================================= */
 /* Expression parsing                                                        */
@@ -259,14 +283,16 @@ static AstNode *parse_primary(Parser *p) {
     if (match(p, LILITH_TOKEN_STRING)) {
         char *s = token_to_string(p->previous);
         size_t len = strlen(s);
+        char *inner;
         if (len >= 2 && s[0] == '"' && s[len - 1] == '"') {
             s[len - 1] = '\0';
-            char *inner = strdup(s + 1);
-            free(s);
-            s = inner;
+            inner = unescape_string(s + 1);
+        } else {
+            inner = unescape_string(s);
         }
-        AstNode *node = ast_string(s, line, col);
         free(s);
+        AstNode *node = ast_string(inner, line, col);
+        free(inner);
         return node;
     }
 
@@ -359,7 +385,7 @@ static AstNode *parse_list_literal(Parser *p) {
     }
     if (clause_count > 0) {
         consume(p, LILITH_TOKEN_LIST_LITERAL_END, "Expected '>]' after list comprehension.");
-        return ast_comprehension(first, clauses, clause_count, line, col);
+        return ast_comprehension(first, clauses, clause_count, 0, line, col);
     }
     /* Regular list literal */
     AstNode **elements = NULL;
@@ -403,7 +429,7 @@ static AstNode *parse_tuple_literal(Parser *p) {
     }
     if (clause_count > 0) {
         consume(p, LILITH_TOKEN_TUPLE_LITERAL_END, "Expected '>)' after tuple comprehension.");
-        return ast_comprehension(first, clauses, clause_count, line, col);
+        return ast_comprehension(first, clauses, clause_count, 1, line, col);
     }
     AstNode **elements = NULL;
     size_t count = 0;
@@ -428,15 +454,41 @@ static AstNode *parse_tuple_literal(Parser *p) {
 static AstNode *parse_dict_literal(Parser *p) {
     size_t line = p->previous.line;
     size_t col = p->previous.column;
+    AstNode *first_key = parse_expression(p);
+    consume(p, LILITH_TOKEN_DICT_MAP, "Expected '[:]' after dictionary key.");
+    AstNode *first_value = parse_expression(p);
+    AstNode **clauses = NULL;
+    size_t clause_count = 0;
+    size_t clause_cap = 0;
+    while (!check(p, LILITH_TOKEN_DICT_LITERAL_END) && !check(p, LILITH_TOKEN_EOF)) {
+        AstNode *clause = parse_comprehension_clause(p);
+        if (clause) {
+            if (clause_count >= clause_cap) {
+                clause_cap = clause_cap < 4 ? 4 : clause_cap * 2;
+                clauses = (AstNode **)realloc(clauses, sizeof(AstNode *) * clause_cap);
+            }
+            clauses[clause_count++] = clause;
+        } else {
+            break;
+        }
+    }
+    if (clause_count > 0) {
+        consume(p, LILITH_TOKEN_DICT_LITERAL_END, "Expected '>}' after dict comprehension.");
+        return ast_dict_comprehension(first_key, first_value, clauses, clause_count, line, col);
+    }
     AstNode **entries = NULL;
     size_t count = 0;
     size_t cap = 0;
+    entries = (AstNode **)malloc(sizeof(AstNode *) * 4);
+    cap = 4;
+    entries[count++] = ast_dict_entry(first_key, first_value, line, col);
     while (!check(p, LILITH_TOKEN_DICT_LITERAL_END) && !check(p, LILITH_TOKEN_EOF)) {
+        if (!match(p, LILITH_TOKEN_COMMA_COMMA)) break;
         AstNode *key = parse_expression(p);
         consume(p, LILITH_TOKEN_DICT_MAP, "Expected '[:]' after dictionary key.");
         AstNode *value = parse_expression(p);
         if (count >= cap) {
-            cap = cap < 4 ? 4 : cap * 2;
+            cap = cap * 2;
             entries = (AstNode **)realloc(entries, sizeof(AstNode *) * cap);
         }
         entries[count++] = ast_dict_entry(key, value, line, col);
@@ -467,7 +519,7 @@ static AstNode *parse_set_literal(Parser *p) {
     }
     if (clause_count > 0) {
         consume(p, LILITH_TOKEN_SET_LITERAL_END, "Expected '}]' after set comprehension.");
-        return ast_comprehension(first, clauses, clause_count, line, col);
+        return ast_comprehension(first, clauses, clause_count, 2, line, col);
     }
     AstNode **elements = NULL;
     size_t count = 0;
@@ -518,6 +570,7 @@ static AstNode *parse_lambda(Parser *p) {
 static AstNode *parse_assignment(Parser *p);
 static AstNode *parse_if_statement(Parser *p);
 static AstNode *parse_while_statement(Parser *p);
+static AstNode *parse_for_statement(Parser *p);
 static AstNode *parse_return_statement(Parser *p);
 static AstNode *parse_yield_statement(Parser *p);
 static AstNode *parse_break_statement(Parser *p);
@@ -533,6 +586,7 @@ static AstNode *parse_hpc_statement(Parser *p, LilithTokenType end_token, const 
 static AstNode *parse_statement(Parser *p) {
     if (match(p, LILITH_TOKEN_IF_START)) return parse_if_statement(p);
     if (match(p, LILITH_TOKEN_WHILE_START)) return parse_while_statement(p);
+    if (match(p, LILITH_TOKEN_FOR_START)) return parse_for_statement(p);
     if (match(p, LILITH_TOKEN_RETURN_START)) return parse_return_statement(p);
     if (match(p, LILITH_TOKEN_YIELD_START)) return parse_yield_statement(p);
     if (match(p, LILITH_TOKEN_BREAK)) return parse_break_statement(p);
@@ -637,6 +691,22 @@ static AstNode *parse_while_statement(Parser *p) {
     return ast_while(cond, body, line, col);
 }
 
+static AstNode *parse_for_statement(Parser *p) {
+    size_t line = p->previous.line;
+    size_t col = p->previous.column;
+    consume(p, LILITH_TOKEN_EXPR_GROUP_START, "Expected '((' after '<:' in for loop.");
+    Token var = consume(p, LILITH_TOKEN_IDENTIFIER, "Expected iteration variable in for loop.");
+    consume(p, LILITH_TOKEN_IN_OPERATOR, "Expected '[%]' after iteration variable.");
+    AstNode *iter = parse_expression(p);
+    consume(p, LILITH_TOKEN_EXPR_GROUP_END, "Expected '))' after for loop iterable.");
+    AstNode *body = parse_block(p);
+    consume(p, LILITH_TOKEN_FOR_END, "Expected ':>' at end of for loop.");
+    char *var_str = token_to_string(var);
+    AstNode *node = ast_for(var_str, iter, body, line, col);
+    free(var_str);
+    return node;
+}
+
 static AstNode *parse_return_statement(Parser *p) {
     size_t line = p->previous.line;
     size_t col = p->previous.column;
@@ -677,6 +747,7 @@ static AstNode *parse_function_statement(Parser *p) {
     Token name = consume(p, LILITH_TOKEN_IDENTIFIER, "Expected function name after '(|'.");
     consume(p, LILITH_TOKEN_EXPR_GROUP_START, "Expected '((' for parameter list.");
     char **params = NULL;
+    char **param_types = NULL;
     size_t count = 0;
     size_t cap = 0;
     while (!check(p, LILITH_TOKEN_EXPR_GROUP_END) && !check(p, LILITH_TOKEN_EOF)) {
@@ -684,20 +755,30 @@ static AstNode *parse_function_statement(Parser *p) {
         if (count >= cap) {
             cap = cap < 4 ? 4 : cap * 2;
             params = (char **)realloc(params, sizeof(char *) * cap);
+            param_types = (char **)realloc(param_types, sizeof(char *) * cap);
         }
-        params[count++] = token_to_string(param);
+        params[count] = token_to_string(param);
+        param_types[count] = NULL;
+        if (match(p, LILITH_TOKEN_TYPE_ANNOT)) {
+            Token type_tok = consume(p, LILITH_TOKEN_IDENTIFIER, "Expected type name after '(:)'.");
+            param_types[count] = token_to_string(type_tok);
+        }
+        count++;
         if (!match(p, LILITH_TOKEN_COMMA_COMMA)) break;
     }
     consume(p, LILITH_TOKEN_EXPR_GROUP_END, "Expected '))' after parameters.");
-    /* Optional return type: skip for now */
+    /* Optional return type */
+    char *return_type = NULL;
     if (match(p, LILITH_TOKEN_ARROW)) {
-        if (check(p, LILITH_TOKEN_IDENTIFIER)) advance(p);
+        Token type_tok = consume(p, LILITH_TOKEN_IDENTIFIER, "Expected return type after '->'.");
+        return_type = token_to_string(type_tok);
     }
     AstNode *body = parse_block(p);
     consume(p, LILITH_TOKEN_FUNC_DEF_END, "Expected '|)' after function body.");
     char *name_str = token_to_string(name);
-    AstNode *node = ast_function(name_str, params, count, body, is_async, line, col);
+    AstNode *node = ast_function(name_str, params, param_types, count, body, return_type, is_async, line, col);
     free(name_str);
+    free(return_type);
     return node;
 }
 

@@ -109,7 +109,46 @@ Constants exposed as functions use the constant name as the verb.
 
 ---
 
-## IV. C Layer Separation
+## IV. Type System (Gradual Typing)
+
+Lilith supports optional runtime-checked type annotations. They are not parse-time constraints; they are validated when a function is called or returns.
+
+### 4.1 Annotation Syntax
+
+* Parameter type: `param (:) type_name`
+* Return type: `-> type_name`
+
+Example:
+```lilith
+(| add ((a (:) number,, b (:) number)) -> number [[ ... ]] |)
+```
+
+### 4.2 Annotation Vocabulary
+
+Annotation type names MUST match the output of `meta..type` exactly. Both use the same source of truth.
+
+Supported types: `any`, `nil`, `bool`, `number`, `string`, `list`, `tuple`, `dict`, `function`, `class`, `instance`.
+
+`native` is visible in `meta..type` output but is not encouraged as a user-facing annotation.
+
+### 4.3 Coarse Runtime Categories
+
+Annotations describe broad runtime categories, not nominal types.
+
+* `class` means "any class object," not "class Foo."
+* `instance` means "any instance object," not "instance of Foo."
+
+### 4.4 Forward Compatibility
+
+Unknown type names are silently accepted. This preserves evolution space for user-defined types and future richer type forms.
+
+### 4.5 Zero Overhead Principle
+
+Unannotated code incurs no type-checking overhead. Checks only run when `param_types` or `return_type` is non-NULL.
+
+---
+
+## V. C Layer Separation
 
 The C implementation uses its own naming convention (`native_math_abs`, `native_str_trim`, etc.). This is internal and does not appear to Lilith programmers.
 
@@ -117,13 +156,15 @@ The C implementation uses its own naming convention (`native_math_abs`, `native_
 
 ---
 
-## V. Amendment Process
+## VI. Amendment Process
 
 1. Propose a new domain or function on the project tracker.
 2. Demonstrate that the proposed name follows Sections II and III.
 3. Demonstrate that no existing domain already owns the concept.
 4. Obtain consensus from a maintainer.
 5. Update this charter and the canonical domain registry.
+
+---
 
 ---
 

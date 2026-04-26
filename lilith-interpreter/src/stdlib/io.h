@@ -10,6 +10,8 @@
 Value native_http_get(int argc, Value *argv);
 Value native_file_read(int argc, Value *argv);
 Value native_file_write(int argc, Value *argv);
+Value native_file_open(int argc, Value *argv);
+Value native_file_close(int argc, Value *argv);
 Value native_exit(int argc, Value *argv);
 
 #endif

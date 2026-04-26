@@ -187,6 +187,25 @@ Value native_file_write(int argc, Value *argv) {
 /* Process control                                                           */
 /* ========================================================================= */
 
+Value native_file_open(int argc, Value *argv) {
+    if (argc < 2 || !IS_STRING(argv[0]) || !IS_STRING(argv[1])) {
+        return NIL_VAL;
+    }
+    const char *path = AS_STRING(argv[0])->chars;
+    const char *mode = AS_STRING(argv[1])->chars;
+    FILE *f = fopen(path, mode);
+    if (!f) return NIL_VAL;
+    /* Return path as a file handle identifier */
+    return OBJ_VAL(obj_string_copy(path, strlen(path)));
+}
+
+Value native_file_close(int argc, Value *argv) {
+    /* No-op: we don't keep real handles, just path strings */
+    (void)argc;
+    (void)argv;
+    return NIL_VAL;
+}
+
 Value native_exit(int argc, Value *argv) {
     int code = 0;
     if (argc >= 1 && IS_NUMBER(argv[0])) {

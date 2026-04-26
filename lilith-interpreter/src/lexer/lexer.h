@@ -43,6 +43,9 @@ typedef enum {
     LILITH_TOKEN_WHILE_START,       /* "<+" */
     LILITH_TOKEN_WHILE_END,         /* "+>" */
 
+    LILITH_TOKEN_FOR_START,         /* "<:" */
+    LILITH_TOKEN_FOR_END,           /* ":>" */
+
     LILITH_TOKEN_RETURN_START,      /* ")-" */
     LILITH_TOKEN_RETURN_END,        /* "-(" */
     LILITH_TOKEN_YIELD_START,       /* ")-?" */

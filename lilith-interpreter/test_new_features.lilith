@@ -1,0 +1,42 @@
+{[
+    /* Test 1: For loop */
+    @!(("=== For Loop ==="))
+    nums [=] [<1,, 2,, 3,, 4,, 5>]
+    sum [=] 0
+    <:((n [%] nums))[[
+        sum [=] sum ++ n
+    ]] :>
+    @!(("sum = ",, sum))
+
+    /* Test 2: String escapes */
+    @!(("=== String Escapes ==="))
+    msg [=] "Hello\nWorld\t!"
+    @!((msg))
+
+    /* Test 3: Lambda implicit return */
+    @!(("=== Lambda Implicit Return ==="))
+    inc [=] (:<((x))[[x ++ 1]]>:)
+    @!(("inc(5) = ",, inc((5))))
+
+    /* Test 4: Dict comprehension */
+    @!(("=== Dict Comprehension ==="))
+    squares [=] {<x [:] x ** 2 [:< x [%] [<1,, 2,, 3>] >:] >}
+    @!(("squares[1] = ",, squares.1))
+    @!(("squares[2] = ",, squares.2))
+    @!(("squares[3] = ",, squares.3))
+
+    /* Test 5: Tuple comprehension */
+    @!(("=== Tuple Comprehension ==="))
+    doubles [=] (<x ** 2 [:< x [%] [<1,, 2,, 3>] >:] >)
+    @!(("doubles = ",, doubles))
+    @!(("doubles[0] = ",, doubles[0]))
+    @!(("doubles[1] = ",, doubles[1]))
+    @!(("doubles[2] = ",, doubles[2]))
+
+    /* Test 6: Set comprehension (deduplication) */
+    @!(("=== Set Comprehension ==="))
+    repeated [=] [<1,, 2,, 2,, 3,, 3,, 3>]
+    unique [=] [{x [:< x [%] repeated >:] }]
+    @!(("unique = ",, unique))
+    @!(("unique length = ",, len((unique))))
+]}

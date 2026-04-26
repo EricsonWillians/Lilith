@@ -19,6 +19,9 @@ typedef struct Interpreter {
     int continue_flag;
     int throw_flag;
     char *error_msg;
+
+    /* Current function for return-type checking */
+    ObjFunction *current_function;
 } Interpreter;
 
 /* -------------------------------------------------------------------------- */

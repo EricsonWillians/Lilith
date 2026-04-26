@@ -1,0 +1,38 @@
+{[
+    @!(("=== 15_types ==="))
+
+    /* Typed function: parameter and return type annotations */
+    (| add ((a (:) number,, b (:) number)) -> number [[
+        )- a ++ b -(
+    ]] |)
+
+    @!(("add((5,, 3)) =",, add((5,, 3))))
+
+    /* Typed function: string parameter and return */
+    (| greet ((name (:) string)) -> string [[
+        )- "Hello " ++ name -(
+    ]] |)
+
+    @!(("greet result:",, greet(("World"))))
+
+    /* Function with mixed typed and untyped parameters */
+    (| mixed ((x (:) number,, y)) -> number [[
+        )- x ++ y -(
+    ]] |)
+
+    @!(("mixed((10,, 5)) =",, mixed((10,, 5))))
+
+    /* Unannotated function: no type checks */
+    (| anything ((x)) [[
+        )- x -(
+    ]] |)
+
+    @!(("anything hello:",, anything(("hello"))))
+    @!(("anything 42:",, anything((42))))
+
+    /* Type error: wrong argument type (caught at runtime) */
+    @!(("--- Type error demo ---"))
+    @!(("Calling add with bad arg should fail..."))
+    result [=] add(("bad"))
+    @!(("Result after error =",, result))
+]}

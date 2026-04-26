@@ -96,8 +96,12 @@ ObjFunction *obj_function_new(const char *name) {
     ObjFunction *fn = ALLOCATE_OBJ(ObjFunction, OBJ_FUNCTION);
     fn->name = name ? strdup(name) : NULL;
     fn->params = NULL;
+    fn->param_types = NULL;
     fn->param_count = 0;
     fn->body = NULL;
+    fn->return_type = NULL;
+    fn->is_async = 0;
+    fn->implicit_return = 0;
     fn->closure = NULL;
     return fn;
 }
@@ -285,6 +289,21 @@ const char *value_to_string(Value value) {
     return "<unknown>";
 }
 
+const char *value_type_name(Value value) {
+    if (IS_NIL(value))       return "nil";
+    if (IS_BOOL(value))      return "bool";
+    if (IS_NUMBER(value))    return "number";
+    if (IS_STRING(value))    return "string";
+    if (IS_LIST(value))      return "list";
+    if (IS_TUPLE(value))     return "tuple";
+    if (IS_DICT(value))      return "dict";
+    if (IS_FUNCTION(value))  return "function";
+    if (IS_CLASS(value))     return "class";
+    if (IS_INSTANCE(value))  return "instance";
+    if (IS_NATIVE(value))    return "native";
+    return "unknown";
+}
+
 /* ========================================================================= */
 /* Equality                                                                 */
 /* ========================================================================= */
@@ -342,7 +361,15 @@ void free_object(Obj *obj) {
         case OBJ_FUNCTION: {
             ObjFunction *f = (ObjFunction *)obj;
             free(f->name);
-            free(f->params);
+            if (f->params) {
+                for (size_t i = 0; i < f->param_count; i++) free(f->params[i]);
+                free(f->params);
+            }
+            if (f->param_types) {
+                for (size_t i = 0; i < f->param_count; i++) free(f->param_types[i]);
+                free(f->param_types);
+            }
+            free(f->return_type);
             free(f);
             break;
         }

@@ -43,6 +43,7 @@ typedef enum {
     AST_DICT,
     AST_DICT_ENTRY,
     AST_COMPREHENSION,
+    AST_DICT_COMPREHENSION,
     AST_FOR_CLAUSE,
     AST_IF_CLAUSE,
     AST_HPC,
@@ -86,7 +87,7 @@ struct AstNode {
         struct { char *var; AstNode *iter; AstNode *body; } for_stmt;
         struct { AstNode *value; } return_stmt;
         struct { AstNode *value; } yield_stmt;
-        struct { char *name; char **params; size_t param_count; AstNode *body; int is_async; } function;
+        struct { char *name; char **params; char **param_types; size_t param_count; AstNode *body; char *return_type; int is_async; } function;
         struct { char *name; AstNode **methods; size_t method_count; } class_def;
         struct { AstNode *try_body; char *catch_var; AstNode *catch_body; AstNode *finally_body; } try_stmt;
         struct { AstNode *expr; AstNode **cases; size_t case_count; } match_stmt;
@@ -108,7 +109,8 @@ struct AstNode {
         struct { AstNode **elements; size_t count; } tuple;
         struct { AstNode **entries; size_t count; } dict;
         struct { AstNode *key; AstNode *value; } dict_entry;
-        struct { AstNode *expr; AstNode **clauses; size_t clause_count; } comprehension;
+        struct { AstNode *expr; AstNode **clauses; size_t clause_count; int container; } comprehension;
+        struct { AstNode *key; AstNode *value; AstNode **clauses; size_t clause_count; } dict_comprehension;
         struct { char *var; AstNode *iter; } for_clause;
         struct { AstNode *cond; } if_clause;
         struct { char *kind; AstNode **specs; size_t spec_count; AstNode *body; } hpc;
@@ -130,7 +132,7 @@ AstNode *ast_return(AstNode *value, size_t line, size_t column);
 AstNode *ast_yield(AstNode *value, size_t line, size_t column);
 AstNode *ast_break(size_t line, size_t column);
 AstNode *ast_continue(size_t line, size_t column);
-AstNode *ast_function(const char *name, char **params, size_t param_count, AstNode *body, int is_async, size_t line, size_t column);
+AstNode *ast_function(const char *name, char **params, char **param_types, size_t param_count, AstNode *body, char *return_type, int is_async, size_t line, size_t column);
 AstNode *ast_class(const char *name, AstNode **methods, size_t method_count, size_t line, size_t column);
 AstNode *ast_try(AstNode *try_body, const char *catch_var, AstNode *catch_body, AstNode *finally_body, size_t line, size_t column);
 AstNode *ast_match(AstNode *expr, AstNode **cases, size_t case_count, size_t line, size_t column);
@@ -153,7 +155,8 @@ AstNode *ast_list(AstNode **elements, size_t count, size_t line, size_t column);
 AstNode *ast_tuple(AstNode **elements, size_t count, size_t line, size_t column);
 AstNode *ast_dict(AstNode **entries, size_t count, size_t line, size_t column);
 AstNode *ast_dict_entry(AstNode *key, AstNode *value, size_t line, size_t column);
-AstNode *ast_comprehension(AstNode *expr, AstNode **clauses, size_t clause_count, size_t line, size_t column);
+AstNode *ast_comprehension(AstNode *expr, AstNode **clauses, size_t clause_count, int container, size_t line, size_t column);
+AstNode *ast_dict_comprehension(AstNode *key, AstNode *value, AstNode **clauses, size_t clause_count, size_t line, size_t column);
 AstNode *ast_for_clause(const char *var, AstNode *iter, size_t line, size_t column);
 AstNode *ast_if_clause(AstNode *cond, size_t line, size_t column);
 AstNode *ast_hpc(const char *kind, AstNode **specs, size_t spec_count, AstNode *body, size_t line, size_t column);

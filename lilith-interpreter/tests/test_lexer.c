@@ -70,6 +70,66 @@ static void test_number_literal(void) {
 }
 
 /**
+ * @brief Tests that the lexer correctly reads a float literal.
+ */
+static void test_float_literal(void) {
+    const char *source = "3.14";
+    Lexer *lexer = lexer_create(source, "test_float_literal.lilith");
+    assert(lexer != NULL);
+
+    Token token = lexer_next_token(lexer);
+    assert(token.type == LILITH_TOKEN_NUMBER);
+    assert(token.length == 4);
+    assert(strncmp(token.lexeme, "3.14", token.length) == 0);
+
+    token = lexer_next_token(lexer);
+    assert(token.type == LILITH_TOKEN_EOF);
+
+    lexer_destroy(lexer);
+    printf("test_float_literal passed.\n");
+}
+
+/**
+ * @brief Tests that the lexer correctly reads a negative literal.
+ */
+static void test_negative_literal(void) {
+    const char *source = "-42";
+    Lexer *lexer = lexer_create(source, "test_negative_literal.lilith");
+    assert(lexer != NULL);
+
+    Token token = lexer_next_token(lexer);
+    assert(token.type == LILITH_TOKEN_NUMBER);
+    assert(token.length == 3);
+    assert(strncmp(token.lexeme, "-42", token.length) == 0);
+
+    token = lexer_next_token(lexer);
+    assert(token.type == LILITH_TOKEN_EOF);
+
+    lexer_destroy(lexer);
+    printf("test_negative_literal passed.\n");
+}
+
+/**
+ * @brief Tests that the lexer correctly reads a negative float literal.
+ */
+static void test_negative_float_literal(void) {
+    const char *source = "-3.14";
+    Lexer *lexer = lexer_create(source, "test_negative_float_literal.lilith");
+    assert(lexer != NULL);
+
+    Token token = lexer_next_token(lexer);
+    assert(token.type == LILITH_TOKEN_NUMBER);
+    assert(token.length == 5);
+    assert(strncmp(token.lexeme, "-3.14", token.length) == 0);
+
+    token = lexer_next_token(lexer);
+    assert(token.type == LILITH_TOKEN_EOF);
+
+    lexer_destroy(lexer);
+    printf("test_negative_float_literal passed.\n");
+}
+
+/**
  * @brief Tests that the lexer correctly reads a string literal.
  *
  * Input: "\"hello\""
@@ -162,6 +222,9 @@ int main(void) {
 
     test_program_tokens();
     test_number_literal();
+    test_float_literal();
+    test_negative_literal();
+    test_negative_float_literal();
     test_string_literal();
     test_comment_skipping();
     test_reserved_token();

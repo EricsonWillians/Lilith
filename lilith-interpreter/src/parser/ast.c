@@ -87,12 +87,14 @@ AstNode *ast_continue(size_t line, size_t column) {
     return ast_create(AST_CONTINUE, line, column);
 }
 
-AstNode *ast_function(const char *name, char **params, size_t param_count, AstNode *body, int is_async, size_t line, size_t column) {
+AstNode *ast_function(const char *name, char **params, char **param_types, size_t param_count, AstNode *body, char *return_type, int is_async, size_t line, size_t column) {
     AstNode *n = ast_create(AST_FUNCTION, line, column);
     n->as.function.name = name ? strdup(name) : NULL;
     n->as.function.params = params;
+    n->as.function.param_types = param_types;
     n->as.function.param_count = param_count;
     n->as.function.body = body;
+    n->as.function.return_type = return_type ? strdup(return_type) : NULL;
     n->as.function.is_async = is_async;
     return n;
 }
@@ -251,11 +253,21 @@ AstNode *ast_dict_entry(AstNode *key, AstNode *value, size_t line, size_t column
     return n;
 }
 
-AstNode *ast_comprehension(AstNode *expr, AstNode **clauses, size_t clause_count, size_t line, size_t column) {
+AstNode *ast_comprehension(AstNode *expr, AstNode **clauses, size_t clause_count, int container, size_t line, size_t column) {
     AstNode *n = ast_create(AST_COMPREHENSION, line, column);
     n->as.comprehension.expr = expr;
     n->as.comprehension.clauses = clauses;
     n->as.comprehension.clause_count = clause_count;
+    n->as.comprehension.container = container;
+    return n;
+}
+
+AstNode *ast_dict_comprehension(AstNode *key, AstNode *value, AstNode **clauses, size_t clause_count, size_t line, size_t column) {
+    AstNode *n = ast_create(AST_DICT_COMPREHENSION, line, column);
+    n->as.dict_comprehension.key = key;
+    n->as.dict_comprehension.value = value;
+    n->as.dict_comprehension.clauses = clauses;
+    n->as.dict_comprehension.clause_count = clause_count;
     return n;
 }
 
@@ -327,8 +339,14 @@ void ast_free(AstNode *node) {
             break;
         case AST_FUNCTION:
             free(node->as.function.name);
-            for (size_t i = 0; i < node->as.function.param_count; i++) free(node->as.function.params[i]);
+            for (size_t i = 0; i < node->as.function.param_count; i++) {
+                free(node->as.function.params[i]);
+                if (node->as.function.param_types && node->as.function.param_types[i])
+                    free(node->as.function.param_types[i]);
+            }
             free(node->as.function.params);
+            free(node->as.function.param_types);
+            free(node->as.function.return_type);
             ast_free(node->as.function.body);
             break;
         case AST_CLASS:
@@ -415,6 +433,12 @@ void ast_free(AstNode *node) {
             ast_free(node->as.comprehension.expr);
             for (size_t i = 0; i < node->as.comprehension.clause_count; i++) ast_free(node->as.comprehension.clauses[i]);
             free(node->as.comprehension.clauses);
+            break;
+        case AST_DICT_COMPREHENSION:
+            ast_free(node->as.dict_comprehension.key);
+            ast_free(node->as.dict_comprehension.value);
+            for (size_t i = 0; i < node->as.dict_comprehension.clause_count; i++) ast_free(node->as.dict_comprehension.clauses[i]);
+            free(node->as.dict_comprehension.clauses);
             break;
         case AST_FOR_CLAUSE:
             free(node->as.for_clause.var);

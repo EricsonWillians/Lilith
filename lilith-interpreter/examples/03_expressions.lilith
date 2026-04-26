@@ -17,9 +17,23 @@
     e [=] 17 %% 5
     @!(("17 %% 5 =",, e))
 
-    /* Unary negation */
+    /* Unary negation (canonical) */
     neg [=] :-:10
     @!((":-:10 =",, neg))
+
+    /* Negative literal sugar */
+    neg_lit [=] -10
+    @!(("-10 =",, neg_lit))
+
+    neg_float [=] -3.14
+    @!(("-3.14 =",, neg_float))
+
+    /* Float literals */
+    pi_val [=] 3.14159
+    @!(("pi_val =",, pi_val))
+
+    half [=] 0.5
+    @!(("0.5 =",, half))
 
     /* Comparison operators */
     eq [=] 5 == 5

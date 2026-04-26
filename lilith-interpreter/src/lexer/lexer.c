@@ -254,6 +254,8 @@ static const TokenMapping tokenMappings[] = {
     {"?]",       LILITH_TOKEN_IF_END},
     {"<+",       LILITH_TOKEN_WHILE_START},
     {"+>",       LILITH_TOKEN_WHILE_END},
+    {"<:",       LILITH_TOKEN_FOR_START},
+    {":>",       LILITH_TOKEN_FOR_END},
     {")-",       LILITH_TOKEN_RETURN_START},
     {"-(",       LILITH_TOKEN_RETURN_END},
 
@@ -338,6 +340,10 @@ static int is_allowed_sym(char c) {
 
 static Token read_number(Lexer *l, size_t start_pos, size_t start_line, size_t start_column) {
     while (is_digit(current_char(l))) advance(l);
+    if (current_char(l) == '.' && is_digit(peek_char(l, 1))) {
+        advance(l); /* consume '.' */
+        while (is_digit(current_char(l))) advance(l);
+    }
     return make_token(l, LILITH_TOKEN_NUMBER, start_pos, start_line, start_column);
 }
 
@@ -440,6 +446,11 @@ Token lexer_next_token(Lexer *l) {
     }
 
     char c = current_char(l);
+    /* Negative number literal sugar: -5, -3.14 */
+    if (c == '-' && is_digit(peek_char(l, 1))) {
+        advance(l); /* consume '-' */
+        return read_number(l, startPos, startLine, startColumn);
+    }
     if (is_digit(c)) {
         return read_number(l, startPos, startLine, startColumn);
     }
@@ -489,6 +500,8 @@ const char *lilith_token_type_to_string(LilithTokenType type) {
         case LILITH_TOKEN_ELSE_INTRO:        return "ELSE_INTRO";
         case LILITH_TOKEN_WHILE_START:       return "WHILE_START";
         case LILITH_TOKEN_WHILE_END:         return "WHILE_END";
+        case LILITH_TOKEN_FOR_START:         return "FOR_START";
+        case LILITH_TOKEN_FOR_END:           return "FOR_END";
         case LILITH_TOKEN_FUNC_DEF_START:    return "FUNC_DEF_START";
         case LILITH_TOKEN_FUNC_DEF_END:      return "FUNC_DEF_END";
         case LILITH_TOKEN_CLASS_DEF_START:   return "CLASS_DEF_START";

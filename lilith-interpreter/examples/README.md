@@ -72,6 +72,7 @@ Most examples produce extensive runtime output so you can observe the interprete
 | `12_imports.lilith` | Module imports `<{ … }>` | Working (parsed as no-op) |
 | `13_lambdas.lilith` | Lambda expressions `(:< … >:)` | Working; lambdas currently return `nil` (no implicit return) |
 | `14_advanced.lilith` | Nested functions, nested HPC inside loops, async + HPC combined, complex comprehensions | Partial; HPC natives reserved for future runtime |
+| `15_types.lilith` | Gradual type system: parameter annotations `(:)`, return types `->` | Working; exits with error code 1 because it intentionally demos a caught type mismatch |
 
 ---
 
@@ -208,6 +209,48 @@ The following globals are aliases to their namespaced counterparts for ergonomic
 
 ---
 
+## Type System
+
+Lilith supports **runtime-checked gradual typing**. Type annotations are optional, checked at runtime, and incur zero overhead when absent.
+
+### Annotation syntax
+
+* Parameter type: `(:) type_name`
+* Return type: `-> type_name`
+
+Example:
+```lilith
+(| add ((a (:) number,, b (:) number)) -> number [[
+    )- a ++ b -(
+]] |)
+```
+
+### Supported annotation types
+
+| Type | Matches |
+|------|---------|
+| `any` | Any value (escape hatch) |
+| `nil` | `nil` |
+| `bool` | `#true` / `#false` |
+| `number` | Integers and floats |
+| `string` | String literals |
+| `list` | `[< ... >]` |
+| `tuple` | `(< ... >)` |
+| `dict` | `{< ... >}` |
+| `function` | User-defined or native functions |
+| `class` | Any class object |
+| `instance` | Any instance object |
+
+`native` appears in `meta..type` output but is not encouraged as a user-facing annotation.
+
+### Important notes
+
+* Annotations are **coarse runtime categories**, not nominal class typing. `class` means "any class object," not "class Foo." `instance` means "any instance object," not "instance of Foo."
+* Unknown type names are silently accepted for forward compatibility.
+* Class methods and lambdas do not yet parse type annotations.
+
+---
+
 ## Syntax Quick Reference
 
 | Concept | Syntax |
@@ -217,6 +260,7 @@ The following globals are aliases to their namespaced counterparts for ergonomic
 | Block | `[[ stmts ]]` |
 | Expression group | `(( expr ))` |
 | Function | `(| name ((params)) [[ body ]] \|)` |
+| Typed function | `(| name ((p (:) type)) -> type [[ body ]] \|)` |
 | Async function | `(| ~ name ((params)) [[ body ]] \|)` |
 | Class | `{\| Name ([: bases :]) [[ methods ]] \|}` |
 | If statement | `[?((cond)) [[then]] :|: [[else]] ?]` |
@@ -243,10 +287,10 @@ The following globals are aliases to their namespaced counterparts for ergonomic
 
 ## Notes & Limitations
 
-* **Numbers** — Only integer literals are supported at this time. Floating-point and negative literal syntax (`-5`) are not yet lexed; use `:-:` for unary negation.
 * **String escapes** — Escape sequences inside strings are not processed; write literal characters only.
 * **Empty collections** — Empty list/tuple/dict/set literals may not parse correctly; include at least one element.
-* **Macros, type annotations, and compile-time features** from the full grammar specification are reserved for future implementation and are not exercised here.
 * **HPC blocks** — Parallel, GPU, tensor, stream, and memory blocks are parsed and their bodies are executed, but the surrounding HPC directives are currently no-ops. The associated native runtime functions are reserved for future implementation.
 * **Lambda returns** — Lambda bodies do not yet implicitly return their last expression; explicit `)- expr -(` is required inside the body to return a value.
 * **HTTPS** — `http..get` supports plain HTTP only; HTTPS requires TLS which is not yet implemented.
+* **Negative literals** — `-5` and `-3.14` are lexer sugar only. `:-:` remains the canonical unary negation operator.
+* **Type annotations** — Checked at runtime (gradual typing). Annotations are coarse runtime categories, not nominal class typing (e.g., `class` means any class object, not a specific class).

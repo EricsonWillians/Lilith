@@ -19,9 +19,9 @@
     @!(("Trying file operation with finally..."))
     {?
         [[
-            file [=] open(("data.txt"))
+            file [=] io..open(("data.txt",, "r"))
             @!(("  File opened"))
-            data [=] read((file))
+            data [=] io..read(("data.txt"))
             @!(("  Data read:",, data))
         ]]
         [! error [/]
@@ -32,7 +32,7 @@
         [:~
             [[
                 @!(("  Finally block executing"))
-                close((file))
+                io..close((file))
                 @!(("  File closed"))
             ]]
         ~:]

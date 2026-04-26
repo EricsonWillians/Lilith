@@ -91,8 +91,12 @@ typedef struct {
     Obj obj;
     char *name;
     char **params;
+    char **param_types;   /* NULL = unannotated; parallel to params */
     size_t param_count;
     struct AstNode *body;
+    char *return_type;    /* NULL = unannotated */
+    int is_async;
+    int implicit_return;
     struct Environment *closure;
 } ObjFunction;
 
@@ -178,6 +182,7 @@ ObjNative *obj_native_new(NativeFn fn, const char *name);
 void value_array_write(ObjList *list, Value value);
 void value_print(Value value);
 const char *value_to_string(Value value);
+const char *value_type_name(Value value);
 bool values_equal(Value a, Value b);
 
 uint32_t hash_string(const char *key, size_t length);

@@ -54,6 +54,12 @@ static int is_truthy(Value value) {
     return 1;
 }
 
+static int check_type(Value value, const char *type_name) {
+    if (!type_name) return 1;
+    if (strcmp(type_name, "any") == 0) return 1;
+    return strcmp(value_type_name(value), type_name) == 0;
+}
+
 static Value value_str_concat(Value a, Value b) {
     const char *as = value_to_string(a);
     const char *bs = value_to_string(b);
@@ -106,6 +112,7 @@ void interpreter_init(Interpreter *interp) {
     interp->continue_flag = 0;
     interp->throw_flag = 0;
     interp->error_msg = NULL;
+    interp->current_function = NULL;
 
     /* Sacred core: print & input */
     define_native(interp, "@!", native_print);
@@ -116,6 +123,8 @@ void interpreter_init(Interpreter *interp) {
     define_native(interp, "http..get", native_http_get);
     define_native(interp, "io..read", native_file_read);
     define_native(interp, "io..write", native_file_write);
+    define_native(interp, "io..open", native_file_open);
+    define_native(interp, "io..close", native_file_close);
     define_native(interp, "sys..exit", native_exit);
 
     /* Math */
@@ -202,6 +211,7 @@ Value interpreter_run(Interpreter *interp, AstNode *program) {
 /* ========================================================================= */
 
 static void eval_comprehension(Interpreter *interp, AstNode *comp, ObjList *result, size_t clause_idx);
+static void eval_dict_comprehension(Interpreter *interp, AstNode *comp, ObjDict *result, size_t clause_idx);
 static int match_pattern(Interpreter *interp, AstNode *pattern, Value value);
 
 /* ========================================================================= */
@@ -348,9 +358,13 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                 Environment *prev = interp->env;
                 interp->env = call_env;
                 interp->return_flag = 0;
-                eval_stmt(interp, method->body);
+                Value block_result = eval_stmt(interp, method->body);
                 Value result = NIL_VAL;
-                if (interp->return_flag) env_get(call_env, "__return__", &result);
+                if (interp->return_flag) {
+                    env_get(call_env, "__return__", &result);
+                } else if (method->implicit_return) {
+                    result = block_result;
+                }
                 interp->return_flag = 0;
                 env_free(call_env);
                 interp->env = prev;
@@ -376,6 +390,17 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
 
             if (IS_FUNCTION(callee)) {
                 ObjFunction *fn = AS_FUNCTION(callee);
+
+                /* Type-check arguments before binding */
+                for (size_t i = 0; i < fn->param_count && i < arg_count; i++) {
+                    if (fn->param_types && fn->param_types[i] && !check_type(args[i], fn->param_types[i])) {
+                        runtime_error(interp, "Expected argument %zu to be %s, got %s",
+                                      i + 1, fn->param_types[i], value_type_name(args[i]));
+                        free(args);
+                        return NIL_VAL;
+                    }
+                }
+
                 Environment *call_env = env_new_enclosing(fn->closure ? fn->closure : interp->globals);
                 for (size_t i = 0; i < fn->param_count && i < arg_count; i++) {
                     env_define(call_env, fn->params[i], args[i]);
@@ -383,12 +408,19 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                 free(args);
 
                 Environment *prev = interp->env;
+                ObjFunction *prev_fn = interp->current_function;
                 interp->env = call_env;
+                interp->current_function = fn;
                 interp->return_flag = 0;
-                eval_stmt(interp, fn->body);
+                Value block_result = eval_stmt(interp, fn->body);
                 Value result = NIL_VAL;
-                if (interp->return_flag) env_get(call_env, "__return__", &result);
+                if (interp->return_flag) {
+                    env_get(call_env, "__return__", &result);
+                } else if (fn->implicit_return) {
+                    result = block_result;
+                }
                 interp->return_flag = 0;
+                interp->current_function = prev_fn;
                 env_free(call_env);
                 interp->env = prev;
                 return result;
@@ -514,6 +546,7 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
                 fn->params[i] = strdup(node->as.lambda.params[i]);
             }
             fn->body = node->as.lambda.body;
+            fn->implicit_return = 1;
             fn->closure = interp->env;
             return OBJ_VAL(fn);
         }
@@ -556,6 +589,30 @@ Value eval_expr(Interpreter *interp, AstNode *node) {
             /* Build a result list by iterating over for-clauses and filtering with if-clauses */
             ObjList *result = obj_list_new();
             eval_comprehension(interp, node, result, 0);
+            if (node->as.comprehension.container == 1) {
+                /* Tuple comprehension */
+                ObjTuple *tuple = obj_tuple_new(result->count);
+                for (size_t i = 0; i < result->count; i++) tuple->items[i] = result->items[i];
+                return OBJ_VAL(tuple);
+            } else if (node->as.comprehension.container == 2) {
+                /* Set comprehension - for now deduplicate via dict keys */
+                ObjDict *set = obj_dict_new();
+                for (size_t i = 0; i < result->count; i++) {
+                    const char *s = value_to_string(result->items[i]);
+                    dict_set(set, obj_string_copy(s, strlen(s)), result->items[i]);
+                }
+                ObjList *list = obj_list_new();
+                for (size_t i = 0; i < set->count; i++) {
+                    value_array_write(list, set->entries[i].value);
+                }
+                return OBJ_VAL(list);
+            }
+            return OBJ_VAL(result);
+        }
+
+        case AST_DICT_COMPREHENSION: {
+            ObjDict *result = obj_dict_new();
+            eval_dict_comprehension(interp, node, result, 0);
             return OBJ_VAL(result);
         }
 
@@ -577,12 +634,13 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
             return eval_stmt(interp, node->as.program.body);
 
         case AST_BLOCK: {
+            Value last = NIL_VAL;
             for (size_t i = 0; i < node->as.block.count; i++) {
-                eval_stmt(interp, node->as.block.stmts[i]);
+                last = eval_stmt(interp, node->as.block.stmts[i]);
                 if (interp->return_flag || interp->break_flag || interp->continue_flag || interp->throw_flag)
                     return NIL_VAL;
             }
-            return NIL_VAL;
+            return last;
         }
 
         case AST_EXPRESSION_STMT:
@@ -716,6 +774,13 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
             /* Store return value in the current environment so caller can retrieve it */
             Value val = eval_expr(interp, node->as.return_stmt.value);
             if (interp->throw_flag) return NIL_VAL;
+            /* Check return type if annotated */
+            if (interp->current_function && interp->current_function->return_type &&
+                !check_type(val, interp->current_function->return_type)) {
+                runtime_error(interp, "Expected return type %s, got %s",
+                              interp->current_function->return_type, value_type_name(val));
+                return NIL_VAL;
+            }
             env_define(interp->env, "__return__", val);
             return val;
         }
@@ -740,10 +805,15 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
             ObjFunction *fn = obj_function_new(node->as.function.name);
             fn->param_count = node->as.function.param_count;
             fn->params = (char **)malloc(sizeof(char *) * fn->param_count);
+            fn->param_types = (char **)calloc(fn->param_count, sizeof(char *));
             for (size_t i = 0; i < fn->param_count; i++) {
                 fn->params[i] = strdup(node->as.function.params[i]);
+                if (node->as.function.param_types && node->as.function.param_types[i])
+                    fn->param_types[i] = strdup(node->as.function.param_types[i]);
             }
             fn->body = node->as.function.body;
+            fn->return_type = node->as.function.return_type ? strdup(node->as.function.return_type) : NULL;
+            fn->is_async = node->as.function.is_async;
             fn->closure = interp->env;
             env_define(interp->env, node->as.function.name, OBJ_VAL(fn));
             return OBJ_VAL(fn);
@@ -757,10 +827,15 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
                     ObjFunction *fn = obj_function_new(method->as.function.name);
                     fn->param_count = method->as.function.param_count;
                     fn->params = (char **)malloc(sizeof(char *) * fn->param_count);
+                    fn->param_types = (char **)calloc(fn->param_count, sizeof(char *));
                     for (size_t j = 0; j < fn->param_count; j++) {
                         fn->params[j] = strdup(method->as.function.params[j]);
+                        if (method->as.function.param_types && method->as.function.param_types[j])
+                            fn->param_types[j] = strdup(method->as.function.param_types[j]);
                     }
                     fn->body = method->as.function.body;
+                    fn->return_type = method->as.function.return_type ? strdup(method->as.function.return_type) : NULL;
+                    fn->is_async = method->as.function.is_async;
                     fn->closure = interp->env;
                     dict_set(klass->methods, obj_string_copy(fn->name, strlen(fn->name)), OBJ_VAL(fn));
                 }
@@ -789,11 +864,19 @@ Value eval_stmt(Interpreter *interp, AstNode *node) {
                 }
                 free(err);
             }
-            if (interp->throw_flag || interp->return_flag || interp->break_flag || interp->continue_flag)
-                return NIL_VAL;
+            int had_error = interp->throw_flag;
+            interp->throw_flag = 0;
 
             if (node->as.try_stmt.finally_body) {
                 eval_stmt(interp, node->as.try_stmt.finally_body);
+            }
+
+            if (interp->return_flag || interp->break_flag || interp->continue_flag)
+                return NIL_VAL;
+
+            /* If there was an error before finally and it wasn't handled in finally, rethrow */
+            if (had_error) {
+                interp->throw_flag = 1;
             }
             return NIL_VAL;
         }
@@ -863,6 +946,48 @@ static void eval_comprehension(Interpreter *interp, AstNode *comp, ObjList *resu
         if (interp->throw_flag) return;
         if (is_truthy(cond)) {
             eval_comprehension(interp, comp, result, clause_idx + 1);
+        }
+    }
+}
+
+static void eval_dict_comprehension(Interpreter *interp, AstNode *comp, ObjDict *result, size_t clause_idx) {
+    if (clause_idx >= comp->as.dict_comprehension.clause_count) {
+        Value key = eval_expr(interp, comp->as.dict_comprehension.key);
+        if (interp->throw_flag) return;
+        Value val = eval_expr(interp, comp->as.dict_comprehension.value);
+        if (interp->throw_flag) return;
+        if (!IS_STRING(key)) { runtime_error(interp, "Dict comprehension keys must be strings."); return; }
+        dict_set(result, AS_STRING(key), val);
+        return;
+    }
+
+    AstNode *clause = comp->as.dict_comprehension.clauses[clause_idx];
+    if (clause->type == AST_FOR_CLAUSE) {
+        Value iterable = eval_expr(interp, clause->as.for_clause.iter);
+        if (interp->throw_flag) return;
+
+        ObjList *list = NULL;
+        ObjTuple *tuple = NULL;
+        ObjString *str = NULL;
+        size_t count = 0;
+        Value *items = NULL;
+
+        if (IS_LIST(iterable)) { list = AS_LIST(iterable); count = list->count; items = list->items; }
+        else if (IS_TUPLE(iterable)) { tuple = AS_TUPLE(iterable); count = tuple->count; items = tuple->items; }
+        else if (IS_STRING(iterable)) { str = AS_STRING(iterable); count = str->length; }
+        else { runtime_error(interp, "Can only iterate over lists, tuples, and strings in comprehensions."); return; }
+
+        for (size_t i = 0; i < count; i++) {
+            Value item = str ? OBJ_VAL(obj_string_copy(&str->chars[i], 1)) : items[i];
+            env_define(interp->env, clause->as.for_clause.var, item);
+            eval_dict_comprehension(interp, comp, result, clause_idx + 1);
+            if (interp->throw_flag) return;
+        }
+    } else if (clause->type == AST_IF_CLAUSE) {
+        Value cond = eval_expr(interp, clause->as.if_clause.cond);
+        if (interp->throw_flag) return;
+        if (is_truthy(cond)) {
+            eval_dict_comprehension(interp, comp, result, clause_idx + 1);
         }
     }
 }
